@@ -5,7 +5,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converter="clr-namespace:StockApp.Converters"
              x:Name="ucStockTV"
-             FontSize="14"
              mc:Ignorable="d" 
              >
     <d:DesignerProperties.DesignStyle>
@@ -18,7 +17,7 @@
         <converter:OnlineToBrushConverter x:Key="otbConverter"/>
     </UserControl.Resources>
 
-    <Border BorderThickness="2" BorderBrush="Blue" Margin="2" Height="350" Width="260">
+    <Border BorderThickness="2" BorderBrush="Blue" Margin="1" >
         <Viewbox>
             <Grid Background="Azure">
 
@@ -31,8 +30,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Grid  Grid.Row="0"
-               Margin="5">
+                <Grid  Grid.Row="0" Margin="5">
                     <Grid.Resources>
                         <Style TargetType="{x:Type Label}">
                             <Setter Property="Margin" Value="10,0,5,0"/>
@@ -95,8 +93,9 @@
                 </Grid>
 
                 <Label Grid.Row="1" 
-               Margin="10,5"
-               Content="{Binding ElementName=ucStockTV, Path=Identifier}" 
+                       Margin="10,5"
+                       Content="{Binding ElementName=ucStockTV, Path=Identifier}" 
+                       FontSize="12"
                MouseLeftButtonDown="Label_MouseLeftButtonDown"
                Foreground="{Binding ElementName=ucStockTV, Path=IsOnline, Converter={StaticResource otbConverter}}"
                HorizontalAlignment="Center"/>
