@@ -24,7 +24,7 @@ Was ist dabei zu beachten:
 
 #### Empfehlung
 Es empfiehlt sich, alle bestehende Regeln bzgl. der StockMaster.exe zu löschen und eine universielle Regel zu erstellen.
-- Windows Firewall Editor starten: wf.msc
+- Windows Firewall Editor starten: wf.msc 
 - auf der linken Seite die "eingehende Regeln" wählen
 - in der mittleren Ansicht am Besten nach Name sortieren und alle Einträge mit stockmaster.exe löschen
 - in der Eingabeaufforderung (Dos-Fenster) folgenden Befehl ausführen (Eingabeaufforderung als Administrator starten!!!)<br>
