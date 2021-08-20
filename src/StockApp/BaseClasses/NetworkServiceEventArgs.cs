@@ -14,4 +14,5 @@ namespace StockApp.BaseClasses
             this.IsNetworkServiceOnline = state;
         }
     }
+
 }

@@ -7,19 +7,24 @@ using System.Net.Sockets;
 
 namespace StockApp.BaseClasses
 {
+    public delegate void NetworkServiceEventHandler(object sender, NetworkServiceDataReceivedEventArgs e);
+
     public class NetworkService
     {
         private UdpClient udpClient;
         private UdpState state;
-        private readonly Tournament tournament;
-        private readonly Action _CallBackAfterUpdateAction;
 
         public event EventHandler StartStopStateChanged;
-        protected virtual void OnStartStopStateChanged(NetworkServiceEventArgs e)
+        protected virtual void OnStartStopStateChanged(bool isRunning)
         {
-            StartStopStateChanged?.Invoke(this, e);
+            StartStopStateChanged?.Invoke(this, new NetworkServiceEventArgs(isRunning));
         }
 
+        public event NetworkServiceEventHandler DataReceived;
+        protected virtual void RaiseDataReceived(byte[] data)
+        {
+            DataReceived?.Invoke(this, new NetworkServiceDataReceivedEventArgs(data));
+        }
 
         private class UdpState
         {
@@ -29,20 +34,22 @@ namespace StockApp.BaseClasses
         }
 
 
-        public NetworkService(Tournament tournament, Action callBackAfterUpdateAction)
+        public NetworkService()
         {
-            this.tournament = tournament;
-            this._CallBackAfterUpdateAction = callBackAfterUpdateAction;
+                
         }
+
 
         public void Start()
         {
             if (udpClient == null)
             {
-                udpClient = new UdpClient(Settings.Instanze.BroadcastPort);
+                udpClient = new UdpClient();
                 udpClient.Client.ReceiveTimeout = 500;
                 udpClient.EnableBroadcast = true;
                 udpClient.Client.Blocking = false;
+                udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, Settings.Instanze.BroadcastPort));
 
             }
             if (state == null)
@@ -50,12 +57,12 @@ namespace StockApp.BaseClasses
                 state = new UdpState()
                 {
                     udpClient = udpClient,
-                    ipEndPoint = new IPEndPoint(IPAddress.Any, Settings.Instanze.BroadcastPort),
+                    ipEndPoint = new IPEndPoint(0,0),
                 };
             }
 
             ReceiveBroadcast();
-            OnStartStopStateChanged(new NetworkServiceEventArgs(true));
+            OnStartStopStateChanged(true);
         }
 
         public void Stop()
@@ -65,7 +72,7 @@ namespace StockApp.BaseClasses
             state.udpClient = null;
             state = null;
 
-            OnStartStopStateChanged(new NetworkServiceEventArgs(false));
+            OnStartStopStateChanged(false);
         }
 
         public bool IsRunning()
@@ -97,14 +104,7 @@ namespace StockApp.BaseClasses
                 byte[] receiveBytes = u?.EndReceive(ar, ref e);
                 if (receiveBytes?.Length > 1)
                 {
-                    DeSerialize(DeCompress(receiveBytes));
-                }
-                else
-                {
-                    if (receiveBytes?[0] == byte.MaxValue)
-                    {
-                        tournament.ResetAllGames();
-                    }
+                    RaiseDataReceived(DeCompress(receiveBytes));
                 }
 
                 r = u?.BeginReceive(new AsyncCallback(ReceiveCallback), state);
@@ -115,13 +115,13 @@ namespace StockApp.BaseClasses
             }
         }
 
-        static byte[] DeCompress(byte[] data)
+        byte[] DeCompress(byte[] data)
         {
             if (data == null)
                 return null;
 
-            MemoryStream input = new MemoryStream(data);
-            MemoryStream output = new MemoryStream();
+            using MemoryStream input = new MemoryStream(data);
+            using MemoryStream output = new MemoryStream();
             using (var datastream = new DeflateStream(input, CompressionMode.Decompress))
             {
                 datastream.CopyTo(output);
@@ -130,97 +130,6 @@ namespace StockApp.BaseClasses
             return output.ToArray();
         }
 
-        void DeSerialize(byte[] data)
-        {
-            /* 
-             * 03 15 09 21 07 09 15
-             *
-             * Aufbau eines Datagramms: 
-             * Im ersten Byte steht die Bahnnummer ( 03 )
-             * In jedem weiteren Byte kommen die laufenden Spiele, erst der Wert der linken Mannschaft,
-             * dann der Wert der rechten Mannschaft
-             * 
-             */
-
-            if (data == null)
-                return;
-
-            try
-            {
-
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
-#endif
-
-                byte bahnNumber = data[0];
-                var courtGames = tournament.GetGamesOfCourt(bahnNumber);
-
-                //Das erste Byte aus dem Array wird nicht mehr benötigt. Daten in ein neues Array kopieren
-                byte[] newData = new byte[data.Length - 1];
-                Array.Copy(data, 1, newData, 0, data.Length - 1);
-
-                int spielZähler = 1;
-
-                //Jedes verfügbare Spiel im Datagramm durchgehen, i+2, da jedes Spiel 2 Bytes braucht. Im ersten Byte der Wert für Link, das zweite Byte für den Wert rechts
-                for (int i = 0; i < newData.Length; i += 2)
-                {
-                    var preGame = courtGames.FirstOrDefault(g => g.GameNumberOverAll == spielZähler - 1);
-                    if (preGame != null)
-                    {
-                        preGame.MasterTurn.PointsTeamA = preGame.NetworkTurn.PointsTeamA;
-                        preGame.MasterTurn.PointsTeamB = preGame.NetworkTurn.PointsTeamB;
-                    }
-
-                    var game = courtGames.FirstOrDefault(g => g.GameNumberOverAll == spielZähler);
-                    if (game == null)
-                        continue;
-
-                    game.NetworkTurn.Reset();
-
-                    if (tournament.IsDirectionOfCourtsFromRightToLeft)
-                    {
-                        if (game.TeamA.SpieleAufStartSeite.Contains(game.GameNumberOverAll))
-                        {
-                            // TeamA befindet sich bei diesem Spiel auf dieser Bahn rechts, 
-                            // das nächste Spiel ist auf einer Bahn mit höherer oder gleicher Bahnnummer (1-> 2-> 3-> 4->...)
-                            game.NetworkTurn.PointsTeamA = newData[i + 1];
-                            game.NetworkTurn.PointsTeamB = newData[i];
-                        }
-                        else
-                        {
-                            // TeamA befindet sich bei diesem Spiel auf der Bahn links, das nächste Spiel ist auf einer Bahn mit niedrigerer Bahnnummer (5->4->3->2->1)
-                            game.NetworkTurn.PointsTeamA = newData[i];
-                            game.NetworkTurn.PointsTeamB = newData[i + 1];
-                        }
-                    }
-                    else
-                    {
-                        if (game.TeamA.SpieleAufStartSeite.Contains(game.GameNumberOverAll))
-                        {
-                            // TeamA befindet sich in diesem Spiel auf dieser Bahn links, das nächste Spiel ist auf einer Bahn mit einer höheren Bahnnummer
-                            game.NetworkTurn.PointsTeamA = newData[i];
-                            game.NetworkTurn.PointsTeamB = newData[i + 1];
-                        }
-                        else
-                        {
-                            // TeamA befindet sich in diesem Spiel auf dieser Bahn rechts, das nächste Spiel ist auf einer Bahn mit einer niedrigeren Bahnnummer
-                            game.NetworkTurn.PointsTeamA = newData[i + 1];
-                            game.NetworkTurn.PointsTeamB = newData[i];
-                        }
-                    }
-
-                    spielZähler++;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
-                _CallBackAfterUpdateAction();
-            }
-        }
 
     }
 }

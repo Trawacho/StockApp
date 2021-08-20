@@ -118,8 +118,23 @@ namespace StockApp.ViewModels
             }
         }
 
-        
 
+        /// <summary>
+        /// Spielgruppe
+        /// Wenn mehrere Gruppen auf der Spielfäche unterschiedliche Turniere spielen
+        /// </summary>
+        public int SpielGruppe
+        {
+            get
+            {
+                return Tournament.SpielGruppe;
+            }
+            set
+            {
+                Tournament.SpielGruppe = value;
+                RaisePropertyChanged();
+            }
+        }
 
         public Referee Referee
         {
@@ -176,8 +191,7 @@ namespace StockApp.ViewModels
 
         public DateTime DateOfTournament { get; set; } = DateTime.Now;
 
-       
-
+        public int SpielGruppe { get; set; } = 3;
         public EntryFee EntryFee { get; set; }
 
         public Referee Referee { get; set; }

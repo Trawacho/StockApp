@@ -82,8 +82,10 @@
     </ApplicationDefinition>
     <Compile Include="BaseClasses\EntryFee.cs" />
     <Compile Include="BaseClasses\Executive.cs" />
+    <Compile Include="BaseClasses\NetworkServiceDataReceivedEventArgs.cs" />
     <Compile Include="BaseClasses\NetworkServiceEventArgs.cs" />
     <Compile Include="BaseClasses\TExecutiveClass.cs" />
+    <Compile Include="Converters\RadioBoolToIntConverter.cs" />
     <Compile Include="Interfaces\IGamesViewModel.cs" />
     <Compile Include="Interfaces\ILiveResultViewModel.cs" />
     <Compile Include="Interfaces\IResultsViewModel.cs" />

@@ -11,6 +11,8 @@ namespace StockApp.Interfaces
         string TournamentName { get; set; }
         DateTime DateOfTournament { get; set; }
         EntryFee EntryFee { get; set; }
+
+        int SpielGruppe { get; set; }
        
         Referee Referee { get; set; }
         CompetitionManager CompetitionManager { get; set; }

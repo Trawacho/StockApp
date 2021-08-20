@@ -37,6 +37,7 @@ namespace StockApp.BaseClasses
             this.ComputingOfficer = tournament.ComputingOfficer;
             this.Referee = tournament.Referee;
             this.CompetitionManager = tournament.CompetitionManager;
+            this.SpielGruppe = tournament.SpielGruppe;
         }
 
 
@@ -58,7 +59,8 @@ namespace StockApp.BaseClasses
                 Referee = this.Referee,
                 StartingTeamChange = this.StartingTeamChange,
                 TournamentName = this.TournamentName,
-                CompetitionManager = this.CompetitionManager
+                CompetitionManager = this.CompetitionManager,
+                SpielGruppe = this.SpielGruppe
             };
 
             tournament.RemoveAllTeams();
@@ -145,6 +147,9 @@ namespace StockApp.BaseClasses
 
         [XmlElement(Order = 16)]
         public CompetitionManager CompetitionManager { get; set; }
+
+        [XmlElement(Order = 17)]
+        public int SpielGruppe { get; set; }
 
 
         [XmlArray(ElementName = "Teams", Order = 90)]

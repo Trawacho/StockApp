@@ -14,6 +14,7 @@ namespace StockApp.BaseClasses
         private readonly List<Team> _teams;
         private bool twoPauseGames;
         private int numberOfGameRounds;
+        private int spielGruppe;
 
         #endregion
 
@@ -72,7 +73,7 @@ namespace StockApp.BaseClasses
             set
             {
                 if (numberOfGameRounds == value) return;
-                if (value < 1 || value > 3) return;
+                if (value < 1 || value > 7) return;
 
                 numberOfGameRounds = value;
                 RaisePropertyChanged();
@@ -91,8 +92,8 @@ namespace StockApp.BaseClasses
         {
             get
             {
-                return Teams.Count(t => !t.IsVirtual) % 2 == 0 
-                                        ? twoPauseGames 
+                return Teams.Count(t => !t.IsVirtual) % 2 == 0
+                                        ? twoPauseGames
                                         : false;
             }
             set
@@ -123,6 +124,50 @@ namespace StockApp.BaseClasses
         /// </summary>
         public int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
 
+        /// <summary>
+        /// Nummer der Gruppe, wenn mehrere Gruppen gleichzeitig auf der Spielfläche sind
+        /// 
+        /// Default: 0
+        /// </summary>
+        public int SpielGruppe
+        {
+            get => this.spielGruppe;
+            set
+            {
+                this.spielGruppe = value;
+                RaisePropertyChanged();
+            }
+        }
+        public string SpielGruppeString()
+        {
+            switch (SpielGruppe)
+            {
+                case 1:
+                    return "A";
+                case 2:
+                    return "B";
+                case 3:
+                    return "C";
+                case 4:
+                    return "D";
+                case 5:
+                    return "E";
+                case 6:
+                    return "F";
+                case 7:
+                    return "G";
+                case 8:
+                    return "H";
+                case 9:
+                    return "I";
+                case 10:
+                    return "J";
+                case 0:
+                default:
+                    return string.Empty;
+            }
+        }
+
         public Referee Referee { get; set; }
         public CompetitionManager CompetitionManager { get; set; }
         public ComputingOfficer ComputingOfficer { get; set; }
@@ -145,6 +190,7 @@ namespace StockApp.BaseClasses
             this.Teams = _teams.AsReadOnly();
 
             this.NumberOfTeamsWithNamedPlayerOnResult = 3;
+            this.SpielGruppe = 0;
             this.Referee = new Referee();
             this.CompetitionManager = new CompetitionManager();
             this.ComputingOfficer = new ComputingOfficer();
@@ -180,17 +226,17 @@ namespace StockApp.BaseClasses
 
         public IEnumerable<Team> GetTeamsRanked(bool live = false)
         {
-                return live 
-                            ? Teams
-                                .Where(v => !v.IsVirtual)
-                                .OrderByDescending(t => t.SpielPunkte_LIVE.positiv)
-                                .ThenByDescending(p => p.StockNote_LIVE)
-                                .ThenByDescending(d => d.StockPunkteDifferenz_LIVE)
-                            : Teams
-                                .Where(v => !v.IsVirtual)
-                                .OrderByDescending(t => t.SpielPunkte.positiv)
-                                .ThenByDescending(p => p.StockNote)
-                                .ThenByDescending(d => d.StockPunkteDifferenz);
+            return live
+                        ? Teams
+                            .Where(v => !v.IsVirtual)
+                            .OrderByDescending(t => t.SpielPunkte_LIVE.positiv)
+                            .ThenByDescending(p => p.StockNote_LIVE)
+                            .ThenByDescending(d => d.StockPunkteDifferenz_LIVE)
+                        : Teams
+                            .Where(v => !v.IsVirtual)
+                            .OrderByDescending(t => t.SpielPunkte.positiv)
+                            .ThenByDescending(p => p.StockNote)
+                            .ThenByDescending(d => d.StockPunkteDifferenz);
         }
 
         /// <summary>
@@ -378,12 +424,12 @@ namespace StockApp.BaseClasses
 
                     game.IsTeamA_Starting = !(i % 2 == 0);
 
-                    if(spielRunde == 2 && StartingTeamChange)
+                    if (spielRunde == 2 && StartingTeamChange)
                     {
                         game.IsTeamA_Starting = !game.IsTeamA_Starting;
                     }
 
-                       
+
 
                     #endregion
 
@@ -461,7 +507,7 @@ namespace StockApp.BaseClasses
                         #region Anspiel berechnen  
 
                         game.IsTeamA_Starting = !(k % 2 == 0);
-                        
+
                         if (spielRunde == 2 && StartingTeamChange)
                         {
                             game.IsTeamA_Starting = !game.IsTeamA_Starting;
@@ -479,6 +525,108 @@ namespace StockApp.BaseClasses
 
         }
 
+        internal void SetBroadcastData(byte[] data)
+        {
+            /* 
+             * 03 00 15 09 21 07 09 15
+             *
+             * Aufbau eines Datagramms: 
+             * Im ersten Byte steht die Bahnnummer ( 03 )
+             * Im zweiten Byte kann die Spielgruppe stehen ( 00 )
+             * In jedem weiteren Byte kommen die laufenden Spiele, erst der Wert der linken Mannschaft,
+             * dann der Wert der rechten Mannschaft
+             * 
+             */
+
+            if (data == null)
+                return;
+
+            try
+            {
+
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
+#endif
+                int bytesToRemove = 1;                          // Ein oder Zwei Bytes, je nach dem, ob eine Spielgruppe mitgesendet wird oder nicht
+                byte bahnNumber = data[0];                      //Im ersten Byte immer die Bahnnummer
+                byte groupNumber = 0;                           //Default 0
+                var courtGames = GetGamesOfCourt(bahnNumber);   //Alle Spiele im Turnier auf dieser Bahn
+
+                //Wenn das Array eine gerade Länge hat, ist im zweiten Byte die Gruppennummer hinterlegt
+                if (data.Length % 2 == 0)
+                {
+                    groupNumber = data[1];
+                    bytesToRemove = 2;
+                }
+
+                //Das erste Byte (die ersten beiden) aus dem Array wird nicht mehr benötigt. Daten in ein neues Array kopieren
+                byte[] newData = new byte[data.Length - bytesToRemove];
+                Array.Copy(data, bytesToRemove, newData, 0, data.Length - bytesToRemove);
+
+                int spielZähler = 1;
+
+                if (groupNumber != this.SpielGruppe) { return; }    //Bei Daten der falschen Spielgruppe Funktion beenden
+
+                //Jedes verfügbare Spiel im Datagramm durchgehen, i+2, da jedes Spiel 2 Bytes braucht. Im ersten Byte der Wert für Link, das zweite Byte für den Wert rechts
+                for (int i = 0; i < newData.Length; i += 2)
+                {
+                    var preGame = courtGames.FirstOrDefault(g => g.GameNumberOverAll == spielZähler - 1);
+                    if (preGame != null)
+                    {
+                        preGame.MasterTurn.PointsTeamA = preGame.NetworkTurn.PointsTeamA;
+                        preGame.MasterTurn.PointsTeamB = preGame.NetworkTurn.PointsTeamB;
+                    }
+
+                    var game = courtGames.FirstOrDefault(g => g.GameNumberOverAll == spielZähler);
+                    if (game == null)
+                        continue;
+
+                    game.NetworkTurn.Reset();
+
+                    if (IsDirectionOfCourtsFromRightToLeft)
+                    {
+                        if (game.TeamA.SpieleAufStartSeite.Contains(game.GameNumberOverAll))
+                        {
+                            // TeamA befindet sich bei diesem Spiel auf dieser Bahn rechts, 
+                            // das nächste Spiel ist auf einer Bahn mit höherer oder gleicher Bahnnummer (1-> 2-> 3-> 4->...)
+                            game.NetworkTurn.PointsTeamA = newData[i + 1];
+                            game.NetworkTurn.PointsTeamB = newData[i];
+                        }
+                        else
+                        {
+                            // TeamA befindet sich bei diesem Spiel auf der Bahn links, das nächste Spiel ist auf einer Bahn mit niedrigerer Bahnnummer (5->4->3->2->1)
+                            game.NetworkTurn.PointsTeamA = newData[i];
+                            game.NetworkTurn.PointsTeamB = newData[i + 1];
+                        }
+                    }
+                    else
+                    {
+                        if (game.TeamA.SpieleAufStartSeite.Contains(game.GameNumberOverAll))
+                        {
+                            // TeamA befindet sich in diesem Spiel auf dieser Bahn links, das nächste Spiel ist auf einer Bahn mit einer höheren Bahnnummer
+                            game.NetworkTurn.PointsTeamA = newData[i];
+                            game.NetworkTurn.PointsTeamB = newData[i + 1];
+                        }
+                        else
+                        {
+                            // TeamA befindet sich in diesem Spiel auf dieser Bahn rechts, das nächste Spiel ist auf einer Bahn mit einer niedrigeren Bahnnummer
+                            game.NetworkTurn.PointsTeamA = newData[i + 1];
+                            game.NetworkTurn.PointsTeamB = newData[i];
+                        }
+                    }
+
+                    spielZähler++;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+            finally
+            {
+                RaisePropertyChanged("");
+            }
+        }
 
         #region CodeFromOldSourceCode
         //--------------

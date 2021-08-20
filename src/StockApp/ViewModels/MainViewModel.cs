@@ -80,13 +80,37 @@ namespace StockApp.ViewModels
         /// </summary>
         public MainViewModel()
         {
-            this._Tournament = new Tournament();
-            ViewModel = new TournamentViewModel(_Tournament);
-            this._NetworkService = new NetworkService(this._Tournament, () => this._Tournament.RaisePropertyChanged(""));
-            this._NetworkService.StartStopStateChanged += _NetworkService_StartStopStateChanged;
+            SetNewTournament(new Tournament());
+            this._NetworkService = new NetworkService();
+            this._NetworkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
+            this._NetworkService.DataReceived += NetworkService_DataReceived;
         }
 
-        private void _NetworkService_StartStopStateChanged(object sender, EventArgs e)
+        private void SetNewTournament(Tournament t)
+        {
+            if (this._Tournament != null)
+                this._Tournament.PropertyChanged -= Tournament_PropertyChanged;
+
+            this._Tournament = t;
+            ViewModel = new TournamentViewModel(_Tournament);
+            RaisePropertyChanged(nameof(WindowTitle));
+            this._Tournament.PropertyChanged += Tournament_PropertyChanged;
+        }
+
+
+
+        private void Tournament_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Tournament.SpielGruppe))
+                RaisePropertyChanged(nameof(WindowTitle));
+        }
+
+        private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
+        {
+            this._Tournament?.SetBroadcastData(e.Data);
+        }
+
+        private void NetworkService_StartStopStateChanged(object sender, EventArgs e)
         {
             RaisePropertyChanged(nameof(UdpButtonContent));
         }
@@ -101,6 +125,20 @@ namespace StockApp.ViewModels
         }
 
         #endregion
+
+        public string WindowTitle
+        {
+            get
+            {
+                if (this._Tournament.SpielGruppe == 0)
+                    return "StockApp";
+                else
+                {
+                    return $"StockApp --> Gruppe:{_Tournament.SpielGruppeString()}";
+                }
+            }
+        }
+      
 
         #region Commands
 
@@ -223,8 +261,7 @@ namespace StockApp.ViewModels
                 return _newTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        this._Tournament = new Tournament();
-                        ViewModel = new TournamentViewModel(this._Tournament);
+                        SetNewTournament(new Tournament());
                     });
             }
         }
@@ -274,13 +311,11 @@ namespace StockApp.ViewModels
                             if (ofd.ShowDialog() == DialogResult.OK)
                             {
                                 var filePath = ofd.FileName;
-
-                                this._Tournament = TournamentExtension.Load(filePath);
-                                ViewModel = new TournamentViewModel(this._Tournament);
+                                SetNewTournament(TournamentExtension.Load(filePath));
                                 this.tournamentFileName = filePath;
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             MessageBox.Show("Fehler beim Öffnen:\r\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -307,12 +342,14 @@ namespace StockApp.ViewModels
                 }
             }
 
+            if (String.IsNullOrEmpty(fileName)) return;
+
             try
             {
                 TournamentExtension.Save(_Tournament, fileName);
                 this.tournamentFileName = fileName;
             }
-            catch( Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Fehler beim Speicher:\r\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

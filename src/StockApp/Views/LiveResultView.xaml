@@ -10,7 +10,7 @@
         d:DataContext="{d:DesignInstance 
                             Type=mo:LiveResultDesignViewModel, 
                             IsDesignTimeCreatable=True}" 
-        Title="Live-Ergebnis" 
+        Title="{Binding Path=WindowTitle}" 
         FontFamily="Verdana"
         WindowStyle="ToolWindow"
         >

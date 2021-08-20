@@ -81,6 +81,13 @@ namespace StockApp.Interfaces
         int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
 
         /// <summary>
+        /// Spielgruppe im Turnier, wenn mehrere Turniere gleichzeitig stattfinden. 
+        /// 
+        /// Default 0: Wenn nur eine Gruppe vorhanden ist
+        /// </summary>
+        public int SpielGruppe { get; set; }
+
+        /// <summary>
         /// Referee
         /// </summary>
         Referee Referee { get; set; }
