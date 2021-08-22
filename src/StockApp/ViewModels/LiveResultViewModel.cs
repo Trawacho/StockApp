@@ -91,6 +91,19 @@ namespace StockApp.ViewModels
             }
         }
 
+        public string WindowTitle
+        {
+            get
+            {
+                if (this.tournament.SpielGruppe == 0)
+                    return "StockApp Live-Ergebnis";
+                else
+                {
+                    return $"StockApp Live-Ergebnis --> Gruppe:{tournament.SpielGruppeString()}";
+                }
+            }
+        }
+
 
         private ICommand _closeCommand;
         public ICommand CloseCommand
@@ -162,6 +175,8 @@ namespace StockApp.ViewModels
         public bool ShowDifferenz { get; set; } = false;
         public bool IsListenerOnline { get; set; } = false;
         public bool ShowStockPunkte { get; set; } = false;
+
+        public string WindowTitle { get; } = "StockApp Live-Result";
         public ICommand CloseCommand { get; }
         public ICommand RefreshCommand { get; }
     }

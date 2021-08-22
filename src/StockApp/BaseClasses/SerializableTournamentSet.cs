@@ -30,6 +30,7 @@ namespace StockApp.BaseClasses
             this.Organizer = turnier.OrgaDaten.Organizer;
             this.DateOfTournament = turnier.OrgaDaten.DateOfTournament;
             this.EntryFee = turnier.OrgaDaten.EntryFee;
+            this.SpielGruppe = turnier.OrgaDaten.SpielGruppe
             this.StartingTeamChange = tournament.StartingTeamChange;
             this.Is8TurnsGame = tournament.Is8TurnsGame;
             this.IsDirectionOfCourtsFromRightToLeft = tournament.IsDirectionOfCourtsFromRightToLeft;
@@ -54,6 +55,7 @@ namespace StockApp.BaseClasses
             turnier.OrgaDaten.Referee = this.Referee;
             turnier.OrgaDaten.TournamentName = this.TournamentName;
             turnier.OrgaDaten.CompetitionManager = this.CompetitionManager;
+            turnier.OrgaDaten.SpielGruppe = this.SpielGruppe;
 
             TeamBewerb teambewerb = new TeamBewerb
             {
@@ -150,6 +152,9 @@ namespace StockApp.BaseClasses
 
         [XmlElement(Order = 16)]
         public Wettbewerbsleiter CompetitionManager { get; set; }
+
+        [XmlElement(Order = 17)]
+        public int SpielGruppe { get; set; }
 
 
         [XmlArray(ElementName = "Teams", Order = 90)]

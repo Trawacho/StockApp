@@ -8,9 +8,9 @@ using System.Net.Sockets;
 
 namespace StockApp.BaseClasses
 {
+    public delegate void NetworkServiceEnventHandler(object sender, NetworkServiceDataReceivedEventArgs e);
     public sealed class NetworkService
     {
-
         private static readonly Lazy<NetworkService> lazy =
         new Lazy<NetworkService>(() => new NetworkService());
 
@@ -18,57 +18,53 @@ namespace StockApp.BaseClasses
 
         private UdpClient udpClient;
         private UdpState state;
-        private TBaseBewerb bewerb;
-        private Action _CallBackAfterUpdateAction;
+        private readonly Tournament tournament;
+        private readonly Action _CallBackAfterUpdateAction;
 
         public event EventHandler StartStopStateChanged;
         void OnStartStopStateChanged(NetworkServiceEventArgs e)
         {
-            StartStopStateChanged?.Invoke(this, e);
+            StartStopStateChanged?.Invoke(this, new NetworkServiceEventArgs(isRunning));
         }
 
-        private NetworkService()
+        public event NetworkServiceEventHandler DataReceived;
+        void RaiseDataReceived(byte[] data)
         {
-
+            DataReceived?.Invoke(this, new NetworkServiceDataReceivedEventArgs(data));
         }
 
-        public void Start(TBaseBewerb bewerb, Action callBackAfterUpdateAction)
+       
+
+
+        public NetworkService()
         {
-            this._CallBackAfterUpdateAction = callBackAfterUpdateAction;
-            this.Start(bewerb);
+                
         }
 
 
-        public void Start(TBaseBewerb bewerb)
+        public void Start()
         {
-            this.bewerb = bewerb;
-
-            try
+            if (udpClient == null)
             {
-                if (udpClient == null)
-                {
-                    udpClient = new UdpClient(Settings.Instanze.BroadcastPort);
-                    udpClient.Client.ReceiveTimeout = 500;
-                    udpClient.EnableBroadcast = true;
-                    udpClient.Client.Blocking = false;
+                udpClient = new UdpClient();
+                udpClient.Client.ReceiveTimeout = 500;
+                udpClient.EnableBroadcast = true;
+                udpClient.Client.Blocking = false;
+                udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, Settings.Instanze.BroadcastPort));
 
-                }
-                if (state == null)
-                {
-                    state = new UdpState()
-                    {
-                        udpClient = udpClient,
-                        ipEndPoint = new IPEndPoint(IPAddress.Any, Settings.Instanze.BroadcastPort),
-                    };
-                }
             }
-            catch (Exception)
+            if (state == null)
             {
-                throw;
+                state = new UdpState()
+                {
+                    udpClient = udpClient,
+                    ipEndPoint = new IPEndPoint(0,0),
+                };
             }
 
             ReceiveBroadcast();
-            OnStartStopStateChanged(new NetworkServiceEventArgs(true));
+            OnStartStopStateChanged(true);
         }
 
         public void Stop()
@@ -79,7 +75,7 @@ namespace StockApp.BaseClasses
             state.udpClient = null;
             state = null;
 
-            OnStartStopStateChanged(new NetworkServiceEventArgs(false));
+            OnStartStopStateChanged(false);
         }
 
         public bool IsRunning()
@@ -103,17 +99,7 @@ namespace StockApp.BaseClasses
                 byte[] receiveBytes = u?.EndReceive(ar, ref e);
                 if (receiveBytes?.Length > 1)
                 {
-                    if (bewerb is TeamBewerb)
-                        DeSerializeTeamBewerb(DeCompress(receiveBytes));
-                    else if (bewerb is Zielbewerb)
-                        DeSerializeZielBewerb(DeCompress(receiveBytes));
-                }
-                else
-                {
-                    if (receiveBytes?[0] == byte.MaxValue)
-                    {
-                        (bewerb as TeamBewerb).ResetAllGames();
-                    }
+                    RaiseDataReceived(DeCompress(receiveBytes));
                 }
 
                 r = u?.BeginReceive(new AsyncCallback(ReceiveCallback), state);
@@ -124,13 +110,13 @@ namespace StockApp.BaseClasses
             }
         }
 
-        static byte[] DeCompress(byte[] data)
+        byte[] DeCompress(byte[] data)
         {
             if (data == null)
                 return null;
 
-            MemoryStream input = new MemoryStream(data);
-            MemoryStream output = new MemoryStream();
+            using MemoryStream input = new MemoryStream(data);
+            using MemoryStream output = new MemoryStream();
             using (var datastream = new DeflateStream(input, CompressionMode.Decompress))
             {
                 datastream.CopyTo(output);

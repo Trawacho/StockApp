@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:viewmodels="clr-namespace:StockApp.ViewModels"
+             xmlns:conv="clr-namespace:StockApp.Converters"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance 
                             Type=viewmodels:TurnierDesignViewModel, 
@@ -11,16 +12,20 @@
              d:DesignHeight="600" d:DesignWidth="800"
              >
 
-
+    <UserControl.Resources>
+        <conv:RadioBoolToIntConverter x:Key="radioButtonToGameGroupConverter"/>
+    </UserControl.Resources>
+    
     <Grid Margin="20,10">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*" MaxWidth="350" MinWidth="200"/>
+            <ColumnDefinition Width="*" MaxWidth="400" MinWidth="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -181,6 +186,45 @@
                      Margin="0,5,5,5" Padding="5,0"
                      Text="{Binding Path=Rechenbuero.ClubName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </Grid>
+        
+        <Label Content="Spielgruppe:" Grid.Row="11" Grid.Column="0"/>
+        <StackPanel Grid.Row="11" Grid.Column="1"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch"
+                    Margin="5">
+            <StackPanel.Resources>
+                <Style TargetType="RadioButton">
+                    <Setter Property="Margin" Value="0,0,7,0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+            </StackPanel.Resources>
+            <RadioButton Content="-" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=0}"/>
+            <RadioButton Content="A" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=1}"/>
+            <RadioButton Content="B" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=2}"/>
+            <RadioButton Content="C" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=3}"/>
+            <RadioButton Content="D" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=4}"/>
+            <RadioButton Content="E" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=5}"/>
+            <RadioButton Content="F" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=6}"/>
+            <RadioButton Content="G" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=7}"/>
+            <RadioButton Content="H"
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=8}"/>
+            <RadioButton Content="I" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=9}"/>
+            <RadioButton Content="J" 
+                         IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=10}"/>
+            
+        </StackPanel>
+        
 
     </Grid>
 

@@ -149,6 +149,7 @@
     <Compile Include="BaseClasses\Networking\MDnsServiceInfo.cs" />
     <Compile Include="BaseClasses\Networking\StockTVSubscriberClient.cs" />
     <Compile Include="BaseClasses\NetworkServiceEventArgs.cs" />
+    <Compile Include="BaseClasses\NetworkServiceDataReceivedEventArgs.cs" />
     <Compile Include="BaseClasses\OrgaDaten.cs" />
     <Compile Include="BaseClasses\Startgebuehr.cs" />
     <Compile Include="BaseClasses\TBaseBewerb.cs" />
@@ -163,6 +164,7 @@
     <Compile Include="Converters\NumberGE0ToTextConverter.cs" />
     <Compile Include="Converters\OnlineToBrushConverter.cs" />
     <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Converters\RadioBoolToIntConverter.cs" />
     <Compile Include="Interfaces\IGamesViewModel.cs" />
     <Compile Include="Interfaces\ILiveResultViewModel.cs" />
     <Compile Include="Interfaces\IResultsViewModel.cs" />

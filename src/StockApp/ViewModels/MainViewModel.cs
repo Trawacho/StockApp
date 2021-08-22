@@ -102,6 +102,11 @@ namespace StockApp.ViewModels
         /// </summary>
         public MainViewModel()
         {
+            SetNewTournament(new Tournament());
+            this._NetworkService = new NetworkService();
+            this._NetworkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
+            this._NetworkService.DataReceived += NetworkService_DataReceived;
+
             this._turnier = new Turnier
             {
                 Wettbewerb = new TeamBewerb()
@@ -117,6 +122,35 @@ namespace StockApp.ViewModels
             _stockTVs.StockTVCollectionAdded += StockTVs_StockTVCollectionAdded;
             _stockTVs.StockTVCollectionRemoved += StockTVs_StockTVCollectionRemoved;
             _stockTVs.StartDiscovery();
+        }
+
+        private void SetNewTournament(Tournament t)
+        {
+            if (this._Tournament != null)
+                this._Tournament.PropertyChanged -= Tournament_PropertyChanged;
+
+            this._Tournament = t;
+            ViewModel = new TournamentViewModel(_Tournament);
+            RaisePropertyChanged(nameof(WindowTitle));
+            this._Tournament.PropertyChanged += Tournament_PropertyChanged;
+        }
+
+
+
+        private void Tournament_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Tournament.SpielGruppe))
+                RaisePropertyChanged(nameof(WindowTitle));
+        }
+
+        private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
+        {
+            this._Tournament?.SetBroadcastData(e.Data);
+        }
+
+        private void NetworkService_StartStopStateChanged(object sender, EventArgs e)
+        {
+            RaisePropertyChanged(nameof(UdpButtonContent));
         }
 
         /// <summary>
@@ -155,7 +189,18 @@ namespace StockApp.ViewModels
             RaisePropertyChanged(nameof(UdpButtonContent));
         }
 
-
+        public string WindowTitle
+        {
+            get
+            {
+                if (this._Tournament.SpielGruppe == 0)
+                    return "StockApp";
+                else
+                {
+                    return $"StockApp --> Gruppe:{_Tournament.SpielGruppeString()}";
+                }
+            }
+        }
 
         #region Commands
 
@@ -326,8 +371,7 @@ namespace StockApp.ViewModels
                 return _newTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        this._turnier = new Turnier();
-                        ViewModel = new TurnierViewModel(this._turnier);
+                        SetNewTournament(new Turnier());
                     });
             }
         }
@@ -377,10 +421,7 @@ namespace StockApp.ViewModels
                             if (ofd.ShowDialog() == DialogResult.OK)
                             {
                                 var filePath = ofd.FileName;
-
-                                //this._Tournament = TeamBewerbExtension.Load(filePath);
-                                this._turnier = TeamBewerbExtension.Load(filePath);
-                                ViewModel = new TurnierViewModel(this._turnier);
+                                SetNewTournament(TournamentExtension.Load(filePath));
                                 this.tournamentFileName = filePath;
                             }
                         }
@@ -438,7 +479,7 @@ namespace StockApp.ViewModels
                 var saveFileDlg = new SaveFileDialog
                 {
                     DefaultExt = "skmr",
-                    Filter = "StockMaster File (*.skmr)|*.skmr"
+                    Filter = "StockApp File (*skmr)|*.skmr"
                 };
                 var dlgResult = saveFileDlg.ShowDialog();
                 if (dlgResult == DialogResult.OK)
@@ -446,6 +487,8 @@ namespace StockApp.ViewModels
                     fileName = saveFileDlg.FileName;
                 }
             }
+
+            if (String.IsNullOrEmpty(fileName)) return;
 
             try
             {

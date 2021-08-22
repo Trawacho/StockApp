@@ -11,7 +11,7 @@
                             IsDesignTimeCreatable=True}" 
         d:DesignHeight ="1024"
         d:DesignWidth="1280"
-        Title="StockApp" Height="1024" Width="1280"
+        Title="{Binding Path=WindowTitle}" Height="1024" Width="1280"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         FontFamily="Verdana" >

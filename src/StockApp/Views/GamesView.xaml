@@ -154,7 +154,7 @@
                 <TextBox Grid.Row="0" 
                      Grid.Column="1" 
                      Text="{Binding Path=NumberOfGameRounds, Mode=TwoWay}"
-                     ToolTip="Wert zwischen 1 und 3"/>
+                     ToolTip="Wert zwischen 1 und 7"/>
 
                 <Label Content="Anzahl der Bahnen:" Grid.Row="1" Grid.Column="0" />
                 <Label Grid.Row="1" Grid.Column="1" 
