@@ -36,7 +36,7 @@ namespace StockApp.BaseClasses
 
         public NetworkService()
         {
-                
+
         }
 
 
@@ -57,7 +57,7 @@ namespace StockApp.BaseClasses
                 state = new UdpState()
                 {
                     udpClient = udpClient,
-                    ipEndPoint = new IPEndPoint(0,0),
+                    ipEndPoint = new IPEndPoint(0, 0),
                 };
             }
 
@@ -67,10 +67,16 @@ namespace StockApp.BaseClasses
 
         public void Stop()
         {
-            udpClient.Dispose();
-            udpClient = null;
-            state.udpClient = null;
-            state = null;
+            if (udpClient != null)
+            {
+                udpClient.Dispose();
+                udpClient = null;
+            }
+            if (state != null)
+            {
+                state.udpClient = null;
+                state = null;
+            }
 
             OnStartStopStateChanged(false);
         }
