@@ -7,14 +7,14 @@ using System.Xml.Serialization;
 
 namespace StockApp.BaseClasses
 {
-    public class SerializableTournamentSet : ITeamBewerb
+    public class SerializableTurnier : ITeamBewerb
     {
-        public SerializableTournamentSet()
+        public SerializableTurnier()
         {
 
         }
 
-        public void SetTournament(Turnier turnier)
+        public void SetTurnier(Turnier turnier)
         {
             var tournament = turnier.Wettbewerb as TeamBewerb;
 
@@ -30,7 +30,7 @@ namespace StockApp.BaseClasses
             this.Organizer = turnier.OrgaDaten.Organizer;
             this.DateOfTournament = turnier.OrgaDaten.DateOfTournament;
             this.EntryFee = turnier.OrgaDaten.EntryFee;
-            this.SpielGruppe = turnier.OrgaDaten.SpielGruppe
+            this.SpielGruppe = turnier.SpielGruppe;
             this.StartingTeamChange = tournament.StartingTeamChange;
             this.Is8TurnsGame = tournament.Is8TurnsGame;
             this.IsDirectionOfCourtsFromRightToLeft = tournament.IsDirectionOfCourtsFromRightToLeft;
@@ -43,7 +43,7 @@ namespace StockApp.BaseClasses
         }
 
 
-        public Turnier GetTournament()
+        public Turnier GetTurnier()
         {
             Turnier turnier = new Turnier();
             turnier.OrgaDaten.Venue = this.Venue;
@@ -55,7 +55,7 @@ namespace StockApp.BaseClasses
             turnier.OrgaDaten.Referee = this.Referee;
             turnier.OrgaDaten.TournamentName = this.TournamentName;
             turnier.OrgaDaten.CompetitionManager = this.CompetitionManager;
-            turnier.OrgaDaten.SpielGruppe = this.SpielGruppe;
+            turnier.SpielGruppe = this.SpielGruppe;
 
             TeamBewerb teambewerb = new TeamBewerb
             {

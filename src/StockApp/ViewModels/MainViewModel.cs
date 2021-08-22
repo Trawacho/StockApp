@@ -102,21 +102,10 @@ namespace StockApp.ViewModels
         /// </summary>
         public MainViewModel()
         {
-            SetNewTournament(new Tournament());
-            this._NetworkService = new NetworkService();
-            this._NetworkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
-            this._NetworkService.DataReceived += NetworkService_DataReceived;
-
-            this._turnier = new Turnier
-            {
-                Wettbewerb = new TeamBewerb()
-            };
-
-            ViewModel = new TurnierViewModel(_turnier);
+            SetNewTurnier(new Turnier());
 
             NetworkService.Instance.StartStopStateChanged += NetworkService_StartStopStateChanged;
-
-            this._turnier.PropertyChanged += Turnier_WettbewerbChanged;
+            NetworkService.Instance.DataReceived += NetworkService_DataReceived;
 
             _stockTVs = new StockTVs();
             _stockTVs.StockTVCollectionAdded += StockTVs_StockTVCollectionAdded;
@@ -124,34 +113,31 @@ namespace StockApp.ViewModels
             _stockTVs.StartDiscovery();
         }
 
-        private void SetNewTournament(Tournament t)
+        private void SetNewTurnier(Turnier t)
         {
-            if (this._Tournament != null)
-                this._Tournament.PropertyChanged -= Tournament_PropertyChanged;
+            if (this._turnier != null)
+                this._turnier.PropertyChanged -= Turnier_PropertyChanged;
 
-            this._Tournament = t;
-            ViewModel = new TournamentViewModel(_Tournament);
+            this._turnier = t;
+            t.Wettbewerb = new TeamBewerb();
+            ViewModel = new TurnierViewModel(_turnier);
             RaisePropertyChanged(nameof(WindowTitle));
-            this._Tournament.PropertyChanged += Tournament_PropertyChanged;
-        }
-
-
-
-        private void Tournament_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(Tournament.SpielGruppe))
-                RaisePropertyChanged(nameof(WindowTitle));
+            this._turnier.PropertyChanged += Turnier_PropertyChanged;
         }
 
         private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
         {
-            this._Tournament?.SetBroadcastData(e.Data);
+            if (e.SpielGruppe() == this._turnier.SpielGruppe ||
+                e.SpielGruppe() == 0)
+                this._turnier.Wettbewerb.SetBroadcastData(e.Data);
         }
 
-        private void NetworkService_StartStopStateChanged(object sender, EventArgs e)
+        private void NetworkService_StartStopStateChanged(object sender, NetworkServiceStateEventArgs e)
         {
             RaisePropertyChanged(nameof(UdpButtonContent));
         }
+
+
 
         /// <summary>
         /// Default-Constructor
@@ -175,29 +161,30 @@ namespace StockApp.ViewModels
         }
 
 
-        private void Turnier_WettbewerbChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Turnier_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(Turnier.Wettbewerb))
             {
                 RaisePropertyChanged(nameof(this.IsTeamBewerb));
                 RaisePropertyChanged(nameof(this.IsZielBewerb));
             }
+            else if (e.PropertyName == nameof(Turnier.SpielGruppe))
+            {
+                RaisePropertyChanged(nameof(WindowTitle));
+            }
         }
 
-        private void NetworkService_StartStopStateChanged(object sender, EventArgs e)
-        {
-            RaisePropertyChanged(nameof(UdpButtonContent));
-        }
+
 
         public string WindowTitle
         {
             get
             {
-                if (this._Tournament.SpielGruppe == 0)
+                if (this._turnier.SpielGruppe == 0)
                     return "StockApp";
                 else
                 {
-                    return $"StockApp --> Gruppe:{_Tournament.SpielGruppeString()}";
+                    return $"StockApp --> Gruppe:{_turnier.SpielGruppeString()}";
                 }
             }
         }
@@ -251,7 +238,8 @@ namespace StockApp.ViewModels
                     {
                         dialogService.SetOwner(App.Current.MainWindow);
                         dialogService.Show(
-                              new LiveResultViewModel(_turnier.Wettbewerb as TeamBewerb));
+                              new LiveResultViewModel(_turnier)
+                              );
                     },
                     (p) =>
                     {
@@ -274,7 +262,7 @@ namespace StockApp.ViewModels
                                 if (NetworkService.Instance.IsRunning())
                                     NetworkService.Instance.Stop();
                                 else
-                                    NetworkService.Instance.Start(this._turnier.Wettbewerb);
+                                    NetworkService.Instance.Start();
 
                                 RaisePropertyChanged(nameof(UdpButtonContent));
                             },
@@ -371,7 +359,7 @@ namespace StockApp.ViewModels
                 return _newTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        SetNewTournament(new Turnier());
+                        SetNewTurnier(new Turnier());
                     });
             }
         }
@@ -421,7 +409,7 @@ namespace StockApp.ViewModels
                             if (ofd.ShowDialog() == DialogResult.OK)
                             {
                                 var filePath = ofd.FileName;
-                                SetNewTournament(TournamentExtension.Load(filePath));
+                                SetNewTurnier(Turnier.Load(filePath));
                                 this.tournamentFileName = filePath;
                             }
                         }
@@ -492,7 +480,7 @@ namespace StockApp.ViewModels
 
             try
             {
-                TeamBewerbExtension.Save(_turnier, fileName);
+                Turnier.Save(_turnier, fileName);
                 this.tournamentFileName = fileName;
             }
             catch (Exception ex)

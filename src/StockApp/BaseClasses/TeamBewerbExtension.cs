@@ -39,35 +39,7 @@ namespace StockApp.BaseClasses
         }
 
 
-        public static void Save(Turnier turnier, string filePath)
-        {
-            if (!(turnier.Wettbewerb is TeamBewerb))
-            {
-                throw new InvalidCastException("Es kann nur ein Teambewerb gespeicert werden");
-            }
-
-            var set = new SerializableTournamentSet();
-            set.SetTournament(turnier);
-            var xmlString = "";
-
-            using (var stringWriter = new StringWriter())
-            using (var writer = XmlWriter.Create(stringWriter))
-            {
-                var serializer = new XmlSerializer(typeof(SerializableTournamentSet));
-                serializer.Serialize(writer, set);
-                xmlString = stringWriter.ToString();
-            }
-
-            File.WriteAllText(filePath, xmlString);
-        }
-
-        public static Turnier Load(string filePath)
-        {
-            using StreamReader reader = new StreamReader(filePath);
-            var serializer = new XmlSerializer(typeof(SerializableTournamentSet));
-            var set = serializer.Deserialize(reader) as SerializableTournamentSet;
-            return set.GetTournament();
-        }
+      
 
 
     }

@@ -1,4 +1,5 @@
 ﻿using StockApp.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace StockApp.BaseClasses
         private readonly List<Team> _teams;
         private bool _twoPauseGames;
         private int _numberOfGameRounds;
-        private int spielGruppe;
+
         #endregion
 
         #region Properties
@@ -86,53 +87,7 @@ namespace StockApp.BaseClasses
         /// </summary>
         public int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
 
-        /// <summary>
-        /// Nummer der Gruppe, wenn mehrere Gruppen gleichzeitig auf der Spielfläche sind
-        /// 
-        /// Default: 0
-        /// </summary>
-        public int SpielGruppe
-        {
-            get => this.spielGruppe;
-            set
-            {
-                this.spielGruppe = value;
-                RaisePropertyChanged();
-            }
-        }
-        public string SpielGruppeString()
-        {
-            switch (SpielGruppe)
-            {
-                case 1:
-                    return "A";
-                case 2:
-                    return "B";
-                case 3:
-                    return "C";
-                case 4:
-                    return "D";
-                case 5:
-                    return "E";
-                case 6:
-                    return "F";
-                case 7:
-                    return "G";
-                case 8:
-                    return "H";
-                case 9:
-                    return "I";
-                case 10:
-                    return "J";
-                case 0:
-                default:
-                    return string.Empty;
-            }
-        }
-
-        public Referee Referee { get; set; }
-        public CompetitionManager CompetitionManager { get; set; }
-        public ComputingOfficer ComputingOfficer { get; set; }
+       
 
         #endregion
 
@@ -149,7 +104,6 @@ namespace StockApp.BaseClasses
 
             this._teams = new List<Team>();
             this.Teams = _teams.AsReadOnly();
-            this.SpielGruppe = 0;
             this.NumberOfTeamsWithNamedPlayerOnResult = 3;
 
         }
@@ -499,7 +453,7 @@ namespace StockApp.BaseClasses
 
         }
 
-        internal void SetBroadcastData(byte[] data)
+        public override void SetBroadcastData(byte[] data)
         {
             /* 
              * 03 00 15 09 21 07 09 15
@@ -539,7 +493,6 @@ namespace StockApp.BaseClasses
 
                 int spielZähler = 1;
 
-                if (groupNumber != this.SpielGruppe) { return; }    //Bei Daten der falschen Spielgruppe Funktion beenden
 
                 //Jedes verfügbare Spiel im Datagramm durchgehen, i+2, da jedes Spiel 2 Bytes braucht. Im ersten Byte der Wert für Link, das zweite Byte für den Wert rechts
                 for (int i = 0; i < newData.Length; i += 2)

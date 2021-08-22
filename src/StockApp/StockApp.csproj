@@ -131,6 +131,8 @@
     <Compile Include="BaseClasses\EnumUtil.cs" />
     <Compile Include="BaseClasses\Executive.cs" />
     <Compile Include="BaseClasses\ExtensionMethods.cs" />
+    <Compile Include="Interfaces\IZielbewerb.cs" />
+    <Compile Include="Interfaces\IBaseBewerb.cs" />
     <Compile Include="BaseClasses\Networking\StockTV.cs" />
     <Compile Include="BaseClasses\Networking\StockTVBegegnung.cs" />
     <Compile Include="BaseClasses\Networking\StockTVCollectionChangedEventArgs.cs" />
@@ -148,7 +150,7 @@
     <Compile Include="BaseClasses\Networking\StockTVSettingsMessage.cs" />
     <Compile Include="BaseClasses\Networking\MDnsServiceInfo.cs" />
     <Compile Include="BaseClasses\Networking\StockTVSubscriberClient.cs" />
-    <Compile Include="BaseClasses\NetworkServiceEventArgs.cs" />
+    <Compile Include="BaseClasses\NetworkServiceStateEventArgs.cs" />
     <Compile Include="BaseClasses\NetworkServiceDataReceivedEventArgs.cs" />
     <Compile Include="BaseClasses\OrgaDaten.cs" />
     <Compile Include="BaseClasses\Startgebuehr.cs" />
@@ -172,7 +174,7 @@
     <Compile Include="Interfaces\ITeamBewerb.cs" />
     <Compile Include="BaseClasses\PointsPerTeamAndGame.cs" />
     <Compile Include="BaseClasses\PointsPerGame.cs" />
-    <Compile Include="BaseClasses\SerializableTournamentSet.cs" />
+    <Compile Include="BaseClasses\SerializableTurnier.cs" />
     <Compile Include="BaseClasses\TBaseClass.cs" />
     <Compile Include="BaseClasses\Game.cs" />
     <Compile Include="BaseClasses\NetworkService.cs" />
@@ -193,6 +195,7 @@
     <Compile Include="Dialogs\IDialogRequestClose.cs" />
     <Compile Include="Dialogs\IDialogService.cs" />
     <Compile Include="Interfaces\IExecutive.cs" />
+    <Compile Include="Interfaces\ITurnier.cs" />
     <Compile Include="Interfaces\ITurnierViewModel.cs" />
     <Compile Include="Interfaces\IZielSpielerViewModel.cs" />
     <Compile Include="Output\Bahnblock\BahnBlock.cs" />

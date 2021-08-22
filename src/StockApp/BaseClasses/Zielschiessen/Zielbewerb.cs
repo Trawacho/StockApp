@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using StockApp.Interfaces;
 
 namespace StockApp.BaseClasses.Zielschiessen
 {
-    public class Zielbewerb : TBaseBewerb
+    public class Zielbewerb : TBaseBewerb, IZielbewerb
     {
         private readonly List<Teilnehmer> _teilnehmerliste;
         private readonly List<int> _zielBahnen;
@@ -72,7 +73,7 @@ namespace StockApp.BaseClasses.Zielschiessen
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine("NetworkService starten, da mindestens eine Wertung Online ist");
 #endif
-                NetworkService.Instance.Start(this);
+                NetworkService.Instance.Start();
             }
 
             RaisePropertyChanged(nameof(FreieBahnen));
@@ -81,7 +82,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// <summary>
         /// Ein neuer Teilnehmer wird der Liste hinten hinzugefügt. 
         /// </summary>
-        internal void AddNewTeilnehmer()
+        public void AddNewTeilnehmer()
         {
             var teilnehmer = new Teilnehmer();
             teilnehmer.PropertyChanged += TeilnehmerHasOnlineWertungChanged;
@@ -94,7 +95,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// True, wenn die Teilnehmerliste nicht voll ist (<= 30)
         /// </summary>
         /// <returns></returns>
-        internal bool CanAddTeilnehmer()
+        public bool CanAddTeilnehmer()
         {
             return _teilnehmerliste.Count() <= 30;
         }
@@ -103,7 +104,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// Der Teilnehmer wird aus der Liste entfernt
         /// </summary>
         /// <param name="teilnehmer"></param>
-        internal void RemoveTeilnehmer(Teilnehmer teilnehmer)
+        public void RemoveTeilnehmer(Teilnehmer teilnehmer)
         {
             this._teilnehmerliste.Remove(teilnehmer);
             for (int i = 0; i < _teilnehmerliste.Count; i++)
@@ -117,12 +118,12 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// True, solange die Anzahl der Teilnehmeer > 1 ist
         /// </summary>
         /// <returns></returns>
-        internal bool CanRemoveTeilnehmer()
+        public bool CanRemoveTeilnehmer()
         {
             return _teilnehmerliste.Count() > 1;
         }
 
-        internal void MoveTeilnehmer(int oldIndex, int newIndex)
+        public void MoveTeilnehmer(int oldIndex, int newIndex)
         {
             var teilnehmer = _teilnehmerliste[oldIndex];
 
@@ -140,6 +141,57 @@ namespace StockApp.BaseClasses.Zielschiessen
             }
 
             RaisePropertyChanged(nameof(this.Teilnehmerliste));
+        }
+
+        public override void SetBroadcastData(byte[] data)
+        {
+            /*
+             * 03 04 08 00 06 10 02 05 10 02 00 10 
+             * 
+             * Aufbau: 
+             * Im ersten Byte steht die Bahnnummer ( 03 )
+             * In jedem weiteren Byte kommen die laufenden Versuche (max 24) 
+             * Somit ist ein Datagramm max 25 Bytes lang
+             * 
+             */
+            if (data == null)
+                return;
+
+            try
+            {
+
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
+#endif
+
+                if (this.Teilnehmerliste.FirstOrDefault(t => t.AktuelleBahn == data[0]) is Teilnehmer spieler)
+                {
+                    if (spieler.Onlinewertung.VersucheAllEntered() && data.Length == 1)
+                    {
+                        spieler.DeleteAktuellBahn();
+                    }
+                    else
+                    {
+                        spieler.Onlinewertung.Reset();
+
+                        for (int i = 1; i < data.Length; i++)
+                        {
+                            spieler?.SetVersuch(i, data[i]);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DeSerializeZielBewerb: {ex.Message}");
+            }
+            finally
+            {
+                RaisePropertyChanged("");
+            }
+
+
+
         }
 
     }

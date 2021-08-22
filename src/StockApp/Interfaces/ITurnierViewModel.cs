@@ -18,7 +18,7 @@ namespace StockApp.Interfaces
         string TurnierName { get; set; }
         DateTime TurnierDatum { get; set; }
         Startgebuehr Startgebuehr { get; set; }
-
+        int SpielGruppe { get; set; }
         Schiedsrichter Schiedsrichter { get; set; }
         Wettbewerbsleiter Wettbewerbsleiter { get; set; }
         Rechenbuero Rechenbuero { get; set; }

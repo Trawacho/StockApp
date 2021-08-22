@@ -1,4 +1,5 @@
 ﻿using StockApp.BaseClasses;
+using StockApp.BaseClasses.Zielschiessen;
 using StockApp.Commands;
 using StockApp.Dialogs;
 using StockApp.Interfaces;
@@ -14,12 +15,16 @@ namespace StockApp.ViewModels
         public event EventHandler<WindowCloseRequestedEventArgs> WindowCloseRequested;
         public event EventHandler<DialogCloseRequestedEventArgs> DialogCloseRequested;
 
+        readonly Turnier turnier;
         readonly TeamBewerb bewerb;
         readonly NetworkService networkService;
-
-        public LiveResultViewModel(TeamBewerb bewerb)
+       
+        public LiveResultViewModel(Turnier turnier)
         {
-            this.bewerb = bewerb;
+            if (turnier.Wettbewerb is Zielbewerb) throw new NotImplementedException("Zielbewerb ist nicht implementiert");
+           
+            this.turnier = turnier;
+            this.bewerb = turnier.Wettbewerb as TeamBewerb;
             this.networkService = NetworkService.Instance;
             this.bewerb.PropertyChanged += Tournament_PropertyChanged;
             networkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
@@ -85,7 +90,7 @@ namespace StockApp.ViewModels
                 if (this.networkService.IsRunning())
                     this.networkService.Stop();
                 else
-                    this.networkService.Start(this.bewerb);
+                    this.networkService.Start();
 
                 RaisePropertyChanged();
             }
@@ -95,11 +100,11 @@ namespace StockApp.ViewModels
         {
             get
             {
-                if (this.tournament.SpielGruppe == 0)
+                if (this.turnier.SpielGruppe == 0)
                     return "StockApp Live-Ergebnis";
                 else
                 {
-                    return $"StockApp Live-Ergebnis --> Gruppe:{tournament.SpielGruppeString()}";
+                    return $"StockApp Live-Ergebnis --> Gruppe:{this.turnier.SpielGruppeString()}";
                 }
             }
         }

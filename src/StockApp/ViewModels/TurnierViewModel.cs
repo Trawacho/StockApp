@@ -198,6 +198,23 @@ namespace StockApp.ViewModels
                 RaisePropertyChanged();
             }
         }
+
+        /// <summary>
+        /// Spielgruppe
+        /// Wenn mehrere Gruppen auf der Spielfäche unterschiedliche Turniere spielen
+        /// </summary>
+        public int SpielGruppe
+        {
+            get
+            {
+                return Turnier.SpielGruppe;
+            }
+            set
+            {
+                Turnier.SpielGruppe = value;
+                RaisePropertyChanged();
+            }
+        }
     }
 
     public class TurnierDesignViewModel : ITurnierViewModel
@@ -216,7 +233,7 @@ namespace StockApp.ViewModels
 
         public DateTime TurnierDatum { get; set; } = DateTime.Now;
 
-
+        public int SpielGruppe { get; set; } = 3;
 
         public Startgebuehr Startgebuehr { get; set; }
 
