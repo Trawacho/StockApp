@@ -107,7 +107,7 @@ namespace StockApp.ViewModels
 
         private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
         {
-            this._Tournament?.SetBroadcastData(e.Data);
+            this._Tournament?.SetBroadcastData(e.NetworkTelegram);
         }
 
         private void NetworkService_StartStopStateChanged(object sender, EventArgs e)
@@ -353,6 +353,12 @@ namespace StockApp.ViewModels
             {
                 MessageBox.Show("Fehler beim Speicher:\r\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        internal void ExitApplication()
+        {
+            _NetworkService.Stop();
+           
         }
     }
 }

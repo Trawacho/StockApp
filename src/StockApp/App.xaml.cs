@@ -1,4 +1,5 @@
-﻿using StockApp.Dialogs;
+﻿using StockApp.BaseClasses;
+using StockApp.Dialogs;
 using StockApp.ViewModels;
 using StockApp.Views;
 using System;
@@ -11,6 +12,7 @@ namespace StockApp
     /// </summary>
     public partial class App : Application
     {
+        MainViewModel viewModel;
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -18,7 +20,7 @@ namespace StockApp
             IDialogService dialogService = new DialogService(MainWindow);
             dialogService.Register<LiveResultViewModel, LiveResultView>();
 
-            var viewModel = new MainViewModel(dialogService);
+            viewModel = new MainViewModel(dialogService);
             var view = new MainWindow()
             {
                 DataContext = viewModel
@@ -29,6 +31,8 @@ namespace StockApp
         }
         protected override void OnExit(ExitEventArgs e)
         {
+            viewModel.ExitApplication();
+
             base.OnExit(e);
             Application.Current.Shutdown(0);
         }
