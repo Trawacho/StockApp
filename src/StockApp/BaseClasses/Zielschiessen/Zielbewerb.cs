@@ -156,17 +156,21 @@ namespace StockApp.BaseClasses.Zielschiessen
              */
             if (data == null)
                 return;
-
             try
             {
-
+                const int headerLength = 10;
+                byte[] header = new byte[headerLength];
+                Array.Copy(data, 0, header, 0, headerLength);
+                
+                byte[] values = new byte[data.Length - headerLength];
+                Array.Copy(data, headerLength, values, 0, data.Length- headerLength);
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
 #endif
 
-                if (this.Teilnehmerliste.FirstOrDefault(t => t.AktuelleBahn == data[0]) is Teilnehmer spieler)
+                if (this.Teilnehmerliste.FirstOrDefault(t => t.AktuelleBahn == header[0]) is Teilnehmer spieler)
                 {
-                    if (spieler.Onlinewertung.VersucheAllEntered() && data.Length == 1)
+                    if (spieler.Onlinewertung.VersucheAllEntered() && values.Length == 0)  //Alle Versuche auf der entsprechenden Bahn eingegeben und von StockTV kommen keine Values
                     {
                         spieler.DeleteAktuellBahn();
                     }
@@ -174,9 +178,10 @@ namespace StockApp.BaseClasses.Zielschiessen
                     {
                         spieler.Onlinewertung.Reset();
 
-                        for (int i = 1; i < data.Length; i++)
+                        for (int i = 0; i < values.Length; i++)
                         {
-                            spieler?.SetVersuch(i, data[i]);
+                            System.Diagnostics.Debug.WriteLine($"Setze an Position {i+1} den Wert {values[i]}");
+                            spieler?.SetVersuch(i +1, values[i]);
                         }
                     }
                 }
