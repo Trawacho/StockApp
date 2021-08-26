@@ -129,6 +129,28 @@ namespace StockApp.BaseClasses.Zielschiessen
         }
 
         /// <summary>
+        /// Wenn möglich, wird die nächste Wertung online geschaltet, oder Spieler geht offline
+        /// </summary>
+        public void SetWertungOfflineOrNext()
+        {
+            int aktuelleWertung = Onlinewertung.Nummer;
+
+            _wertungen.ToList().ForEach(w => w.IsOnline = false);
+            if (_wertungen.Any(w => w.Nummer == aktuelleWertung + 1))
+            {
+                var w = _wertungen.First(w => w.Nummer == aktuelleWertung + 1);
+                if (!w.VersucheAllEntered())
+                    _wertungen.First(w => w.Nummer == aktuelleWertung + 1).IsOnline = true;
+            }
+
+            if (!_wertungen.Any(w => w.IsOnline))
+                AktuelleBahn = -1;
+
+            RaisePropertyChanged(nameof(this.HasOnlineWertung));
+            RaisePropertyChanged(nameof(this.Onlinewertung));
+        }
+
+        /// <summary>
         /// Liste der Wertungen
         /// </summary>
         public ObservableCollection<Wertung> Wertungen

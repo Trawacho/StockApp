@@ -178,7 +178,7 @@ namespace StockApp.BaseClasses.Zielschiessen
                 {
                     if (spieler.Onlinewertung.VersucheAllEntered() && values.Length == 0)  //Alle Versuche auf der entsprechenden Bahn eingegeben und von StockTV kommen keine Values
                     {
-                        spieler.DeleteAktuellBahn();
+                        spieler.SetWertungOfflineOrNext();
                     }
                     else
                     {
