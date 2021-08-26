@@ -143,27 +143,33 @@ namespace StockApp.BaseClasses.Zielschiessen
             RaisePropertyChanged(nameof(this.Teilnehmerliste));
         }
 
+        private byte[] lastReceivedData;
         public override void SetBroadcastData(byte[] data)
         {
+            if (data == null) return;
+
+            if (data.SequenceEqual(lastReceivedData ?? new byte[0])) return;
+            lastReceivedData = new byte[data.Length];
+            Array.Copy(data, 0, lastReceivedData, 0, data.Length);
+
             /*
-             * 03 04 08 00 06 10 02 05 10 02 00 10 
+             * 03 01 00 00 00 00 00 00 00 00 04 08 00 06 10 02 05 10 02 00 10 
              * 
              * Aufbau: 
-             * Im ersten Byte steht die Bahnnummer ( 03 )
+             * Im den ersten zehn Bytes (Header) stehen Settings von StocktV wie Bahnnummer (Position1) usw
              * In jedem weiteren Byte kommen die laufenden Versuche (max 24) 
-             * Somit ist ein Datagramm max 25 Bytes lang
+             * Somit ist ein Datagramm max 10+24 Bytes lang
              * 
              */
-            if (data == null)
-                return;
+
             try
             {
                 const int headerLength = 10;
                 byte[] header = new byte[headerLength];
                 Array.Copy(data, 0, header, 0, headerLength);
-                
+
                 byte[] values = new byte[data.Length - headerLength];
-                Array.Copy(data, headerLength, values, 0, data.Length- headerLength);
+                Array.Copy(data, headerLength, values, 0, data.Length - headerLength);
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
 #endif
@@ -180,8 +186,7 @@ namespace StockApp.BaseClasses.Zielschiessen
 
                         for (int i = 0; i < values.Length; i++)
                         {
-                            System.Diagnostics.Debug.WriteLine($"Setze an Position {i+1} den Wert {values[i]}");
-                            spieler?.SetVersuch(i +1, values[i]);
+                            spieler?.SetVersuch(i + 1, values[i]);
                         }
                     }
                 }
