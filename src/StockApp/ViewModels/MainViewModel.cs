@@ -237,13 +237,18 @@ namespace StockApp.ViewModels
                     (p) =>
                     {
                         dialogService.SetOwner(App.Current.MainWindow);
-                        dialogService.Show(
-                              new LiveResultViewModel(_turnier)
-                              );
+                        if (this.IsTeamBewerb)
+                            dialogService.Show(
+                                  new LiveResultViewModel(_turnier)
+                                  );
+                        else if (this.IsZielBewerb)
+                            dialogService.Show(
+                                new LiveZielResultViewModel(_turnier)
+                                );
                     },
-                    (p) =>
+                    (p) => 
                     {
-                        return IsTeamBewerb;
+                        return true;
                     }
                     );
             }

@@ -131,6 +131,7 @@
     <Compile Include="BaseClasses\EnumUtil.cs" />
     <Compile Include="BaseClasses\Executive.cs" />
     <Compile Include="BaseClasses\ExtensionMethods.cs" />
+    <Compile Include="Converters\TupleValue_ZielSpieler_Converter.cs" />
     <Compile Include="Interfaces\IZielbewerb.cs" />
     <Compile Include="Interfaces\IBaseBewerb.cs" />
     <Compile Include="BaseClasses\Networking\StockTV.cs" />
@@ -234,6 +235,7 @@
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\GamesViewModel.cs" />
     <Compile Include="ViewModels\LiveResultViewModel.cs" />
+    <Compile Include="ViewModels\LiveZielResultViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ResultsViewModel.cs" />
     <Compile Include="ViewModels\StockTVCollectionViewModel.cs" />
@@ -245,6 +247,9 @@
     </Compile>
     <Compile Include="Views\LiveResultView.xaml.cs">
       <DependentUpon>LiveResultView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LiveZielResultView.xaml.cs">
+      <DependentUpon>LiveZielResultView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ResultsView.xaml.cs">
       <DependentUpon>ResultsView.xaml</DependentUpon>
@@ -286,6 +291,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\GamesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LiveZielResultView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

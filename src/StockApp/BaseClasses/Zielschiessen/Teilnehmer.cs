@@ -274,5 +274,12 @@ namespace StockApp.BaseClasses.Zielschiessen
 
         }
 
+        internal int GesamtPunkte
+        {
+            get
+            {
+                return Wertungen.Sum(w => w.GesamtPunkte);
+            }
+        }
     }
 }

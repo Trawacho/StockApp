@@ -88,7 +88,6 @@
                     Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
                     Margin="10,5"/>
             <Button Content="Live Ergebnisse"
-                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
                     Command="{Binding Path=ShowLiveResultCommand}"
                     Margin="10,5"/>
 

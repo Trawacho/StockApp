@@ -18,6 +18,7 @@ namespace StockApp
 
             IDialogService dialogService = new DialogService(MainWindow);
             dialogService.Register<LiveResultViewModel, LiveResultView>();
+            dialogService.Register<LiveZielResultViewModel, LiveZielResultView>();
 
             viewModel = new MainViewModel(dialogService);
             var view = new MainWindow()

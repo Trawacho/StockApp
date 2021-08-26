@@ -114,6 +114,12 @@ namespace StockApp.BaseClasses.Zielschiessen
             RaisePropertyChanged(nameof(this.Teilnehmerliste));
         }
 
+        internal IEnumerable<Teilnehmer> GetTeilnehmerRanked()
+        {
+            return this._teilnehmerliste
+                        .OrderByDescending(t => t.Wertungen.Sum(w => w.GesamtPunkte));
+        }
+
         /// <summary>
         /// True, solange die Anzahl der Teilnehmeer > 1 ist
         /// </summary>
