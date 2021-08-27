@@ -35,7 +35,7 @@
                 if (firstname == value)
                     return;
 
-                firstname = value;
+                firstname = value.Trim();
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(Name));
             }
@@ -51,7 +51,7 @@
                 if (lastname == value)
                     return;
 
-                lastname = value;
+                lastname = value.Trim();
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(Name));
             }
@@ -66,7 +66,7 @@
             {
                 if (licensenumber == value)
                     return;
-                licensenumber = value;
+                licensenumber = value.Trim();
                 RaisePropertyChanged();
             }
         }
