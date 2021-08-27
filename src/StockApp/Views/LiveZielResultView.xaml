@@ -16,22 +16,18 @@
     <Window.Resources>
 
         <co:TupleValue_ZielSpieler_Converter x:Key="TVC"/>
+        <co:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
-
-        <Style x:Key="CenterAligned" TargetType="DataGridCell">
-            <Style.Setters>
-                <Setter Property="TextBlock.TextAlignment" Value="Center"/>
-                <Setter Property="BorderThickness" Value="0"/>
-            </Style.Setters>
+        <Style x:Key="ColumnElementLeftAlignStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5,0,5,0"/>
+            <Setter Property="TextAlignment" Value="Left"/>
         </Style>
 
-        <Style x:Key="SpielerNameStyle" TargetType="DataGridCell">
-            <Style.Setters>
-                <Setter Property="TextBlock.TextAlignment" Value="Left"/>
-                <Setter Property="TextBlock.Margin" Value="0"/>
-                <Setter Property="BorderThickness" Value="0"/>
-            </Style.Setters>
+        <Style x:Key="ColumnElementCenterAlignStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5,0,5,0"/>
+            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
+
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -39,30 +35,47 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <Viewbox VerticalAlignment="Top" Margin="10" Grid.Row="0" HorizontalAlignment="Stretch">
+        <Viewbox VerticalAlignment="Top" Margin="10" Grid.Row="0" HorizontalAlignment="Stretch" >
             <DataGrid ItemsSource="{Binding Path=Ergebnisliste, Mode=OneWay}"
                       RowHeaderWidth="0"
+                      IsReadOnly="True"
                       Margin="0"
+                      AlternatingRowBackground="WhiteSmoke"
                       CanUserSortColumns="False"
                       AutoGenerateColumns="False">
                 <DataGrid.Columns>
-
                     <DataGridTextColumn Header="Platz"
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=Platzierung}"/>
 
                     <DataGridTextColumn Header="Name" 
-                                        CellStyle="{StaticResource SpielerNameStyle}"
+                                        ElementStyle="{StaticResource ColumnElementLeftAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC}, 
                                                           ConverterParameter=Name}"/>
 
+                    <DataGridTextColumn Header="Verein" 
+                                        ElementStyle="{StaticResource ColumnElementLeftAlignStyle}"
+                                        Binding="{Binding Converter={StaticResource TVC},
+                                                          ConverterParameter=Verein}"
+                                        Visibility="{Binding Path=IsChecked, 
+                                                             Source={x:Reference checkBoxVereinsname},
+                                                             Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <DataGridTextColumn Header="Nation" 
+                                        ElementStyle="{StaticResource ColumnElementLeftAlignStyle}"
+                                        Binding="{Binding Converter={StaticResource TVC},
+                                                          ConverterParameter=Verein}"
+                                        Visibility="{Binding Path=IsChecked, 
+                                                             Source={x:Reference checkBoxNation},
+                                                             Converter={StaticResource BoolToVisibilityConverter}}"/>
+
                     <DataGridTextColumn Header="Punkte" 
-                                        CellStyle="{StaticResource CenterAligned}" 
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}" 
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=Punkte}"/>
 
                     <DataGridTextColumn Header="Details" 
-                                        CellStyle="{StaticResource CenterAligned}" 
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=Details}"/>
                 </DataGrid.Columns>
@@ -80,7 +93,22 @@
                       VerticalAlignment="Stretch"
                       VerticalContentAlignment="Center"
                       Margin="10" Padding="10" IsThreeState="False"/>
+            
+            <CheckBox Content="Vereinsname"
+                      x:Name="checkBoxVereinsname"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      VerticalContentAlignment="Center"
+                      Margin="10" Padding="10" IsThreeState="False"/>
 
+            <CheckBox Content="Nation"
+                      x:Name="checkBoxNation"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      VerticalContentAlignment="Center"
+                      Margin="10" Padding="10" IsThreeState="False"/>
 
             <CheckBox IsChecked="{Binding Path=IsLive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                       Content="Refresh nach jeder Kehre" 

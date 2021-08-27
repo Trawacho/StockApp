@@ -30,6 +30,10 @@ namespace StockApp.Converters
                 {
                     return t.Item1.ToString();
                 }
+                if (String.Equals("Verein", p))
+                {
+                    return t.Item2.Vereinsname;
+                }
                 if (String.Equals("Punkte", p))
                 {
                     return t.Item2.GesamtPunkte.ToString();
@@ -37,13 +41,13 @@ namespace StockApp.Converters
                 if (String.Equals("Details", p))
                 {
                     string s = "";
-                    foreach (var w in t.Item2.Wertungen.OrderBy(o=>o.Nummer))
+                    foreach (var w in t.Item2.Wertungen.OrderBy(o => o.Nummer))
                     {
-                        s += $"{w.GesamtPunkte} =>({w.PunkteMassenMitte}-{w.PunkteSchuesse}-{w.PunkteMassenSeitlich}-{w.PunkteKombinieren}) ";
+                        s += $"{w.GesamtPunkte} >({w.PunkteMassenMitte}-{w.PunkteSchuesse}-{w.PunkteMassenSeitlich}-{w.PunkteKombinieren}) ";
                     }
                     return s;
                 }
-               
+
             }
 
             return "not def";
