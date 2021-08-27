@@ -138,6 +138,7 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -170,8 +171,16 @@
                              MaxLength="40"/>
 
                     <Label Grid.Row="3" Grid.Column="0" Margin="0,10,0,0"
-                           Content="Passnummer:" HorizontalContentAlignment="Right"/>
+                           Content="Nation:" HorizontalContentAlignment="Right"/>
                     <TextBox Grid.Row="3" Grid.Column="1" Margin="0,10,0,0"
+                             Text="{Binding Path=SelectedPlayer.Nation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalContentAlignment="Left" 
+                             VerticalContentAlignment="Center"
+                             MaxLength="40"/>
+                    
+                    <Label Grid.Row="4" Grid.Column="0" Margin="0,10,0,0"
+                           Content="Passnummer:" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Margin="0,10,0,0"
                              Text="{Binding Path=SelectedPlayer.LicenseNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              HorizontalContentAlignment="Left" 
                              VerticalContentAlignment="Center"

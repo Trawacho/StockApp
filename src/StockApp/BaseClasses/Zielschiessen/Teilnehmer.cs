@@ -10,6 +10,7 @@ namespace StockApp.BaseClasses.Zielschiessen
 
         private readonly ObservableCollection<Wertung> _wertungen = new ObservableCollection<Wertung>();
         private string _vereinsname;
+        private string _nation;
         private int _aktuelleBahn;
 
         #endregion
@@ -59,6 +60,17 @@ namespace StockApp.BaseClasses.Zielschiessen
                     return;
 
                 _vereinsname = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string Nation
+        {
+            get => _nation;
+            set
+            {
+                if (_nation == value) return;
+                _nation = value.Trim();
                 RaisePropertyChanged();
             }
         }

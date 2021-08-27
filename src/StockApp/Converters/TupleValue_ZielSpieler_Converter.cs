@@ -14,7 +14,7 @@ namespace StockApp.Converters
         /// </summary>
         /// <param name="value">ValueTuple<int, Team></param>
         /// <param name="targetType">string</param>
-        /// <param name="parameter">Name, Platzierung, Punkte, Details</param>
+        /// <param name="parameter">Name, Platzierung, Punkte, Details, Verein, Nation</param>
         /// <param name="culture">unused</param>
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -33,6 +33,10 @@ namespace StockApp.Converters
                 if (String.Equals("Verein", p))
                 {
                     return t.Item2.Vereinsname;
+                }
+                if (String.Equals("Nation", p))
+                {
+                    return t.Item2.Nation;
                 }
                 if (String.Equals("Punkte", p))
                 {

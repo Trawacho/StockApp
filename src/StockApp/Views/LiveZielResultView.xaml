@@ -64,7 +64,7 @@
                     <DataGridTextColumn Header="Nation" 
                                         ElementStyle="{StaticResource ColumnElementLeftAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
-                                                          ConverterParameter=Verein}"
+                                                          ConverterParameter=Nation}"
                                         Visibility="{Binding Path=IsChecked, 
                                                              Source={x:Reference checkBoxNation},
                                                              Converter={StaticResource BoolToVisibilityConverter}}"/>
