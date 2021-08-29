@@ -20,21 +20,14 @@
         <co:TupleValue_Team_Converter x:Key="TVC"/>
         <co:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
-        <Style x:Key="CenterAligned" TargetType="DataGridCell">
-            <Style.Setters>
-                <Setter Property="TextBlock.TextAlignment" Value="Center" />
-                <Setter Property="BorderThickness" Value="0"/>
-            </Style.Setters>
+        <Style x:Key="ColumnElementLeftAlignStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5,0,5,0"/>
+            <Setter Property="TextAlignment" Value="Left"/>
         </Style>
-        
-        <Style x:Key="TeamNameStyle" TargetType="DataGridCell">
-            <Style.Setters>
-                <Setter Property="TextBlock.TextAlignment" Value="Left" />
-                <Setter Property="TextBlock.Margin" Value="0" />
-                <Setter Property="BorderBrush" Value="Red"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Margin" Value="0"/>
-            </Style.Setters>
+
+        <Style x:Key="ColumnElementCenterAlignStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5,0,5,0"/>
+            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
   
     </Window.Resources>
@@ -51,6 +44,7 @@
 
             <DataGrid ItemsSource="{Binding Path=Ergebnisliste, Mode=OneWay}"
                       RowHeaderWidth="0"
+                      IsReadOnly="True"
                       Margin="0"
                       CanUserSortColumns="False"
                       AutoGenerateColumns="False">
@@ -62,17 +56,17 @@
                                                           ConverterParameter=Platzierung}"/>
 
                     <DataGridTextColumn Header="Name" 
-                                        CellStyle="{StaticResource TeamNameStyle}"
+                                        ElementStyle="{StaticResource ColumnElementLeftAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC}, 
                                                           ConverterParameter=TeamName}"/>
 
                     <DataGridTextColumn Header="Punkte" 
-                                        CellStyle="{StaticResource CenterAligned}" 
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=SpielPunkte}"/>
 
                     <DataGridTextColumn Header="Stockpunkte" 
-                                        CellStyle="{StaticResource CenterAligned}" 
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=StockPunkte}"
                                         Visibility="{Binding Path=IsChecked, 
@@ -80,12 +74,12 @@
                                                              Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                     <DataGridTextColumn Header="Stocknote" 
-                                        CellStyle="{StaticResource CenterAligned}" 
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=StockNote}"/>
 
                     <DataGridTextColumn Header="Differenz" 
-                                        CellStyle="{StaticResource CenterAligned}" 
+                                        ElementStyle="{StaticResource ColumnElementCenterAlignStyle}"
                                         Binding="{Binding Converter={StaticResource TVC},
                                                           ConverterParameter=StockPunkteDifferenz}"
                                         Visibility="{Binding Path=IsChecked,
