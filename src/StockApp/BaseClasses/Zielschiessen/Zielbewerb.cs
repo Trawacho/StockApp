@@ -8,30 +8,37 @@ namespace StockApp.BaseClasses.Zielschiessen
 {
     public class Zielbewerb : TBaseBewerb, IZielbewerb
     {
+        /// <summary>
+        /// Liste der Teilnehmer
+        /// </summary>
         private readonly List<Teilnehmer> _teilnehmerliste;
+        
+        /// <summary>
+        /// fixtive Liste mit Nummern für Bahnen, die zur Auswahl stehen
+        /// </summary>
         private readonly List<int> _zielBahnen;
 
         public Zielbewerb()
         {
-            this._teilnehmerliste = new List<Teilnehmer>();
-            this.AddNewTeilnehmer();
+            _teilnehmerliste = new List<Teilnehmer>();
+            AddNewTeilnehmer();
 
-            this._zielBahnen = new List<int>();
+            _zielBahnen = new List<int>();
 
             for (int i = 1; i <= 15; i++)
             {
-                this._zielBahnen.Add(i);
+                _zielBahnen.Add(i);
             }
         }
 
         /// <summary>
-        /// ReadOnly Liste aller Teilnehmer
+        /// Liste aller Teilnehmer
         /// </summary>
         public IOrderedEnumerable<Teilnehmer> Teilnehmerliste
         {
             get
             {
-                return this._teilnehmerliste.OrderBy(t => t.Startnummer);
+                return _teilnehmerliste.AsReadOnly().OrderBy(t => t.Startnummer);
             }
         }
 
@@ -42,7 +49,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         {
             get
             {
-                return this._zielBahnen.OrderBy(b => b);
+                return _zielBahnen.OrderBy(b => b);
             }
         }
 
@@ -66,6 +73,8 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// <param name="e"></param>
         public void TeilnehmerHasOnlineWertungChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(Teilnehmer.Wertungen)) RaisePropertyChanged("");
+
             if (e.PropertyName != nameof(Teilnehmer.HasOnlineWertung)) return;
 
             if (Teilnehmerliste.Any(t => t.HasOnlineWertung) && !NetworkService.Instance.IsRunning())
@@ -86,9 +95,9 @@ namespace StockApp.BaseClasses.Zielschiessen
         {
             var teilnehmer = new Teilnehmer();
             teilnehmer.PropertyChanged += TeilnehmerHasOnlineWertungChanged;
-            teilnehmer.Startnummer = this._teilnehmerliste.Count + 1;
-            this._teilnehmerliste.Add(teilnehmer);
-            RaisePropertyChanged(nameof(this.Teilnehmerliste));
+            teilnehmer.Startnummer = _teilnehmerliste.Count + 1;
+            _teilnehmerliste.Add(teilnehmer);
+            RaisePropertyChanged(nameof(Teilnehmerliste));
         }
 
         /// <summary>
@@ -106,17 +115,17 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// <param name="teilnehmer"></param>
         public void RemoveTeilnehmer(Teilnehmer teilnehmer)
         {
-            this._teilnehmerliste.Remove(teilnehmer);
+            _teilnehmerliste.Remove(teilnehmer);
             for (int i = 0; i < _teilnehmerliste.Count; i++)
             {
                 _teilnehmerliste[i].Startnummer = i + 1;
             }
-            RaisePropertyChanged(nameof(this.Teilnehmerliste));
+            RaisePropertyChanged(nameof(Teilnehmerliste));
         }
 
         internal IEnumerable<Teilnehmer> GetTeilnehmerRanked()
         {
-            return this._teilnehmerliste
+            return _teilnehmerliste
                         .OrderByDescending(t => t.Wertungen.Sum(w => w.GesamtPunkte));
         }
 
@@ -182,7 +191,7 @@ namespace StockApp.BaseClasses.Zielschiessen
 
                 if (this.Teilnehmerliste.FirstOrDefault(t => t.AktuelleBahn == header[0]) is Teilnehmer spieler)
                 {
-                    if (spieler.Onlinewertung.VersucheAllEntered() && values.Length == 0)  //Alle Versuche auf der entsprechenden Bahn eingegeben und von StockTV kommen keine Values
+                    if (spieler.Onlinewertung.VersucheAllEntered() && values.Length == 0)  //Alle Versuche auf der entsprechenden Bahn wurden eingegeben und von StockTV kommen keine Values, nur der Header
                     {
                         spieler.SetWertungOfflineOrNext();
                     }
@@ -205,8 +214,6 @@ namespace StockApp.BaseClasses.Zielschiessen
             {
                 RaisePropertyChanged("");
             }
-
-
 
         }
 

@@ -46,13 +46,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         public int Nummer
         {
             get => _nummer;
-            set
-            {
-                if (_nummer == value)
-                    return;
-                _nummer = value;
-                RaisePropertyChanged();
-            }
+            set => SetProperty(ref _nummer, value);
         }
 
         /// <summary>
@@ -66,14 +60,8 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// </summary>
         public bool IsOnline
         {
-            get => _isOnline; set
-            {
-                if (_isOnline == value)
-                    return;
-
-                _isOnline = value;
-                RaisePropertyChanged();
-            }
+            get => _isOnline; 
+            set => SetProperty(ref _isOnline, value);
         }
 
         /// <summary>

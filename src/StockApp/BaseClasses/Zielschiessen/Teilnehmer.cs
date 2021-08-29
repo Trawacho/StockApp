@@ -27,6 +27,10 @@ namespace StockApp.BaseClasses.Zielschiessen
             {
                 RaisePropertyChanged(nameof(Name));
             }
+            else if(e.PropertyName == nameof(Wertung.Disziplinen))
+            {
+                RaisePropertyChanged(nameof(Wertungen));
+            }
         }
 
 

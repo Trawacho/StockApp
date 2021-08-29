@@ -5,8 +5,8 @@ namespace StockApp.BaseClasses.Zielschiessen
 {
     public enum Disziplinart
     {
-        [Description ("Massen Mitte")]
-        MassenMitte  = 1,
+        [Description("Massen Mitte")]
+        MassenMitte = 1,
 
         [Description("Schiessen")]
         Schiessen = 2,
@@ -40,67 +40,40 @@ namespace StockApp.BaseClasses.Zielschiessen
         }
 
 
-        #region Readonly Properties
+        #region Properties
 
         public int Versuch1
         {
-            get => versuche[0]; set
-            {
-                AddVersuch(0, value);
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Summe));
-            }
+            get => versuche[0];
+            set => AddVersuch(nameof(Versuch1), 0, value);
         }
         public int Versuch2
         {
             get => versuche[1];
-            set
-            {
-                AddVersuch(1, value);
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Summe));
-            }
+            set => AddVersuch(nameof(Versuch2), 1, value);
         }
         public int Versuch3
         {
             get => versuche[2];
-            set
-            {
-                AddVersuch(2, value);
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Summe));
-            }
+            set => AddVersuch(nameof(Versuch3), 2, value);
         }
         public int Versuch4
         {
             get => versuche[3];
-            set
-            {
-                AddVersuch(3, value);
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Summe));
-            }
+            set => AddVersuch(nameof(Versuch4), 3, value);
         }
         public int Versuch5
         {
             get => versuche[4];
-            set
-            {
-                AddVersuch(4, value);
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Summe));
-            }
+            set => AddVersuch(nameof(Versuch5), 4, value);
         }
         public int Versuch6
         {
             get => versuche[5];
-            set
-            {
-                AddVersuch(5, value);
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Summe));
-            }
+            set => AddVersuch(nameof(Versuch6), 5, value);
         }
+
+
 
         /// <summary>
         /// Art der Disziplin dieser 6 Versuche
@@ -133,7 +106,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         #endregion
 
         #region Funktionen
-        
+
         #region Public
 
         /// <summary>
@@ -159,7 +132,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         }
 
         #endregion
-        
+
         #region Private
 
         /// <summary>
@@ -167,7 +140,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// </summary>
         /// <param name="index"></param>
         /// <param name="value"></param>
-        private void AddVersuch(int index, int value)
+        private void AddVersuch(string propertyName, int index, int value)
         {
             if (value == -1)
             {
@@ -181,6 +154,9 @@ namespace StockApp.BaseClasses.Zielschiessen
             {
                 versuche[index] = value;
             }
+
+            RaisePropertyChanged(propertyName);
+            RaisePropertyChanged(nameof(Summe));
         }
 
 
