@@ -1,5 +1,4 @@
 ﻿using StockApp.Interfaces;
-using System;
 
 namespace StockApp.BaseClasses
 {
