@@ -12,7 +12,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// Liste der Teilnehmer
         /// </summary>
         private readonly List<Teilnehmer> _teilnehmerliste;
-        
+
         /// <summary>
         /// fixtive Liste mit Nummern für Bahnen, die zur Auswahl stehen
         /// </summary>
@@ -34,24 +34,13 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// <summary>
         /// Liste aller Teilnehmer
         /// </summary>
-        public IOrderedEnumerable<Teilnehmer> Teilnehmerliste
-        {
-            get
-            {
-                return _teilnehmerliste.AsReadOnly().OrderBy(t => t.Startnummer);
-            }
-        }
+        public IOrderedEnumerable<Teilnehmer> Teilnehmerliste => _teilnehmerliste.AsReadOnly().OrderBy(t => t.Startnummer);
 
         /// <summary>
         /// Auflistung aller Bahnen (15 Bahnen werden automatisch ergzeugt)
         /// </summary>
-        public IOrderedEnumerable<int> Bahnen
-        {
-            get
-            {
-                return _zielBahnen.OrderBy(b => b);
-            }
-        }
+        public IOrderedEnumerable<int> Bahnen => _zielBahnen.OrderBy(b => b);
+
 
         /// <summary>
         /// Auflistung aller freier Bahnen
@@ -71,9 +60,9 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void TeilnehmerHasOnlineWertungChanged(object sender, PropertyChangedEventArgs e)
+        private void TeilnehmerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Teilnehmer.Wertungen)) RaisePropertyChanged("");
+            if (e.PropertyName == nameof(Teilnehmer.Wertungen)) RaisePropertyChanged(nameof(Teilnehmer.Wertungen));
 
             if (e.PropertyName != nameof(Teilnehmer.HasOnlineWertung)) return;
 
@@ -94,7 +83,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         public void AddNewTeilnehmer()
         {
             var teilnehmer = new Teilnehmer();
-            teilnehmer.PropertyChanged += TeilnehmerHasOnlineWertungChanged;
+            teilnehmer.PropertyChanged += TeilnehmerPropertyChanged;
             teilnehmer.Startnummer = _teilnehmerliste.Count + 1;
             _teilnehmerliste.Add(teilnehmer);
             RaisePropertyChanged(nameof(Teilnehmerliste));
@@ -123,20 +112,13 @@ namespace StockApp.BaseClasses.Zielschiessen
             RaisePropertyChanged(nameof(Teilnehmerliste));
         }
 
-        internal IEnumerable<Teilnehmer> GetTeilnehmerRanked()
-        {
-            return _teilnehmerliste
-                        .OrderByDescending(t => t.Wertungen.Sum(w => w.GesamtPunkte));
-        }
+        internal IEnumerable<Teilnehmer> GetTeilnehmerRanked() => _teilnehmerliste.OrderByDescending(t => t.Wertungen.Sum(w => w.GesamtPunkte));
 
         /// <summary>
         /// True, solange die Anzahl der Teilnehmeer > 1 ist
         /// </summary>
         /// <returns></returns>
-        public bool CanRemoveTeilnehmer()
-        {
-            return _teilnehmerliste.Count() > 1;
-        }
+        public bool CanRemoveTeilnehmer() => _teilnehmerliste.Count() > 1;
 
         public void MoveTeilnehmer(int oldIndex, int newIndex)
         {
