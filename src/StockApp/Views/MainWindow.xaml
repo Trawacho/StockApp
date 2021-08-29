@@ -72,29 +72,36 @@
                     <Setter Property="Padding" Value="13"/>
                 </Style>
             </StackPanel.Resources>
+            
             <Button Content="Tunier Daten" 
                     Command="{Binding Path=ShowTournamentViewCommand}"
                     Margin="10,10,10,5"/>
-            <Button Content="Mannschaften" 
-                    Command="{Binding Path=ShowTeamsViewCommand}"
-                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
-                    Margin="10,5"/>
-            <Button Content="Spiele" 
-                    Command="{Binding Path=ShowGamesViewCommand}"
-                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
-                    Margin="10,5"/>
-            <Button Content="Ergebnisse" 
-                    Command="{Binding Path=ShowResultsViewCommand}"
-                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
-                    Margin="10,5"/>
-            <Button Content="Live Ergebnisse"
-                    Command="{Binding Path=ShowLiveResultCommand}"
-                    Margin="10,5"/>
-
+            
             <Button Content="Spieler"
                     Command="{Binding Path=ShowZielSpielerViewCommand}"
                     Visibility="{Binding Path=IsZielBewerb, Converter={StaticResource BoolToVisibilityConverter}}"
                     Margin="10,5"/>
+            
+            <Button Content="Mannschaften" 
+                    Command="{Binding Path=ShowTeamsViewCommand}"
+                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
+                    Margin="10,5"/>
+            
+            <Button Content="Spiele" 
+                    Command="{Binding Path=ShowGamesViewCommand}"
+                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
+                    Margin="10,5"/>
+            
+            <Button Content="Ergebnisse" 
+                    Command="{Binding Path=ShowResultsViewCommand}"
+                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
+                    Margin="10,5"/>
+            
+            <Button Content="Live Ergebnisse"
+                    Command="{Binding Path=ShowLiveResultCommand}"
+                    Margin="10,5"/>
+
+          
             
             <Button Content="StockTV"
                     Command="{Binding Path=ShowStockTVCollectionCommand}"
