@@ -1,5 +1,4 @@
 ﻿using StockApp.Interfaces;
-using System;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -93,11 +92,6 @@ namespace StockApp.BaseClasses
 
         public static void Save(Turnier turnier, string filePath)
         {
-            if (!(turnier.Wettbewerb is TeamBewerb))
-            {
-                throw new InvalidCastException("Es kann nur ein Teambewerb gespeicert werden");
-            }
-
             var set = new SerializableTurnier();
             set.SetTurnier(turnier);
             var xmlString = "";

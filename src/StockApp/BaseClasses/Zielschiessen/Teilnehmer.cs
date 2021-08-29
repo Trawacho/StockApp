@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace StockApp.BaseClasses.Zielschiessen
 {
+
     public class Teilnehmer : TPlayer
     {
         #region Fields
@@ -27,7 +28,7 @@ namespace StockApp.BaseClasses.Zielschiessen
             {
                 RaisePropertyChanged(nameof(Name));
             }
-            else if(e.PropertyName == nameof(Wertung.Disziplinen))
+            else if (e.PropertyName == nameof(Wertung.Disziplinen))
             {
                 RaisePropertyChanged(nameof(Wertungen));
             }
@@ -85,15 +86,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         public int AktuelleBahn
         {
             get => _aktuelleBahn;
-            private set
-            {
-                if (_aktuelleBahn == value)
-                    return;
-
-                _aktuelleBahn = value;
-                RaisePropertyChanged();
-
-            }
+            private set => SetProperty(ref _aktuelleBahn, value);
         }
 
         /// <summary>

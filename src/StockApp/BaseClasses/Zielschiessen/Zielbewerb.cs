@@ -82,9 +82,17 @@ namespace StockApp.BaseClasses.Zielschiessen
         /// </summary>
         public void AddNewTeilnehmer()
         {
-            var teilnehmer = new Teilnehmer();
+            AddTeilnehmer(new Teilnehmer());
+        }
+
+        public void AddTeilnehmer(Teilnehmer teilnehmer)
+        {
+            if (teilnehmer.Startnummer < 1 ||
+                _teilnehmerliste.Any(t => t.Startnummer == teilnehmer.Startnummer))
+                teilnehmer.Startnummer = _teilnehmerliste.Count + 1;
+                
+
             teilnehmer.PropertyChanged += TeilnehmerPropertyChanged;
-            teilnehmer.Startnummer = _teilnehmerliste.Count + 1;
             _teilnehmerliste.Add(teilnehmer);
             RaisePropertyChanged(nameof(Teilnehmerliste));
         }

@@ -1,4 +1,5 @@
-﻿using StockApp.Interfaces;
+﻿using StockApp.BaseClasses.Zielschiessen;
+using StockApp.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace StockApp.BaseClasses
 {
-    public class SerializableTurnier : ITeamBewerb
+    public class SerializableTurnier : ITeamBewerb, IZielbewerb
     {
         public SerializableTurnier()
         {
@@ -16,76 +17,155 @@ namespace StockApp.BaseClasses
 
         public void SetTurnier(Turnier turnier)
         {
-            var tournament = turnier.Wettbewerb as TeamBewerb;
 
-            this.XTeams = tournament.Teams.ToList();
-            this.Games = tournament.GetAllGames()
-                                 .OrderBy(r => r.RoundOfGame)
-                                 .ThenBy(g => g.GameNumber)
-                                 .ThenBy(c => c.CourtNumber)
-                                 .ToList();
-            this.TournamentName = turnier.OrgaDaten.TournamentName;
-            this.Venue = turnier.OrgaDaten.Venue;
-            this.Operator = turnier.OrgaDaten.Operator;
-            this.Organizer = turnier.OrgaDaten.Organizer;
-            this.DateOfTournament = turnier.OrgaDaten.DateOfTournament;
-            this.EntryFee = turnier.OrgaDaten.EntryFee;
-            this.SpielGruppe = turnier.SpielGruppe;
-            this.StartingTeamChange = tournament.StartingTeamChange;
-            this.Is8TurnsGame = tournament.Is8TurnsGame;
-            this.IsDirectionOfCourtsFromRightToLeft = tournament.IsDirectionOfCourtsFromRightToLeft;
-            this.TwoPauseGames = tournament.TwoPauseGames;
-            this.NumberOfGameRounds = tournament.NumberOfGameRounds;
-            this.NumberOfTeamsWithNamedPlayerOnResult = tournament.NumberOfTeamsWithNamedPlayerOnResult;
-            this.ComputingOfficer = turnier.OrgaDaten.ComputingOfficer;
-            this.Referee = turnier.OrgaDaten.Referee;
-            this.CompetitionManager = turnier.OrgaDaten.CompetitionManager;
+            this.Organisation = turnier.OrgaDaten;
+
+            this.Wettbewerbsart = turnier.Wettbewerb.GetType().Name;
+
+            if (turnier.Wettbewerb is TeamBewerb teamBewerb)
+            {
+                this.XTeams = teamBewerb.Teams.ToList();
+                this.Games = teamBewerb.GetAllGames()
+                                     .OrderBy(r => r.RoundOfGame)
+                                     .ThenBy(g => g.GameNumber)
+                                     .ThenBy(c => c.CourtNumber)
+                                     .ToList();
+
+                this.SpielGruppe = turnier.SpielGruppe;
+                this.StartingTeamChange = teamBewerb.StartingTeamChange;
+                this.Is8TurnsGame = teamBewerb.Is8TurnsGame;
+                this.IsDirectionOfCourtsFromRightToLeft = teamBewerb.IsDirectionOfCourtsFromRightToLeft;
+                this.TwoPauseGames = teamBewerb.TwoPauseGames;
+                this.NumberOfGameRounds = teamBewerb.NumberOfGameRounds;
+                this.NumberOfTeamsWithNamedPlayerOnResult = teamBewerb.NumberOfTeamsWithNamedPlayerOnResult;
+            }
+            else if (turnier.Wettbewerb is Zielbewerb zielbewerb)
+            {
+                this.XTeilnehmerliste = new List<XMLTeilnehmer>();
+                foreach (var t in zielbewerb.Teilnehmerliste)
+                {
+                    this.XTeilnehmerliste.Add(new XMLTeilnehmer(t));
+                }
+            }
         }
 
 
         public Turnier GetTurnier()
         {
             Turnier turnier = new Turnier();
-            turnier.OrgaDaten.Venue = this.Venue;
-            turnier.OrgaDaten.Operator = this.Operator;
-            turnier.OrgaDaten.Organizer = this.Organizer;
-            turnier.OrgaDaten.DateOfTournament = this.DateOfTournament;
-            turnier.OrgaDaten.EntryFee = this.EntryFee;
-            turnier.OrgaDaten.ComputingOfficer = this.ComputingOfficer;
-            turnier.OrgaDaten.Referee = this.Referee;
-            turnier.OrgaDaten.TournamentName = this.TournamentName;
-            turnier.OrgaDaten.CompetitionManager = this.CompetitionManager;
+            turnier.OrgaDaten = this.Organisation;
+
             turnier.SpielGruppe = this.SpielGruppe;
 
-            TeamBewerb teambewerb = new TeamBewerb
+            if (Wettbewerbsart == nameof(TeamBewerb))
             {
-                Is8TurnsGame = this.Is8TurnsGame,
-                IsDirectionOfCourtsFromRightToLeft = this.IsDirectionOfCourtsFromRightToLeft,
-                TwoPauseGames = this.TwoPauseGames,
-                NumberOfGameRounds = this.NumberOfGameRounds,
-                NumberOfTeamsWithNamedPlayerOnResult = this.NumberOfTeamsWithNamedPlayerOnResult,
-                StartingTeamChange = this.StartingTeamChange,
-            };
 
-            teambewerb.RemoveAllTeams();
+                TeamBewerb teambewerb = new TeamBewerb
+                {
+                    Is8TurnsGame = this.Is8TurnsGame,
+                    IsDirectionOfCourtsFromRightToLeft = this.IsDirectionOfCourtsFromRightToLeft,
+                    TwoPauseGames = this.TwoPauseGames,
+                    NumberOfGameRounds = this.NumberOfGameRounds,
+                    NumberOfTeamsWithNamedPlayerOnResult = this.NumberOfTeamsWithNamedPlayerOnResult,
+                    StartingTeamChange = this.StartingTeamChange,
+                };
 
-            foreach (var team in XTeams)
-            {
-                teambewerb.AddTeam(team);
+                teambewerb.RemoveAllTeams();
+
+                foreach (var team in XTeams)
+                {
+                    teambewerb.AddTeam(team);
+                }
+
+                foreach (var game in Games)
+                {
+                    game.TeamA = XTeams.First(t => t.StartNumber == game.StartNumberTeamA);
+                    game.TeamB = XTeams.First(t => t.StartNumber == game.StartNumberTeamB);
+
+                    teambewerb.Teams.First(t => t == game.TeamA).AddGame(game);
+                    teambewerb.Teams.First(t => t == game.TeamB).AddGame(game);
+                }
+
+                turnier.Wettbewerb = teambewerb;
             }
-
-            foreach (var game in Games)
+            else if (Wettbewerbsart == nameof(Zielbewerb))
             {
-                game.TeamA = XTeams.First(t => t.StartNumber == game.StartNumberTeamA);
-                game.TeamB = XTeams.First(t => t.StartNumber == game.StartNumberTeamB);
+                var bewerb = new Zielbewerb();
+                foreach (var t in this.XTeilnehmerliste)
+                {
+                    var tln = new Teilnehmer()
+                    {
+                        FirstName = t.Vorname,
+                        LastName = t.Nachname,
+                        Vereinsname = t.Vereinsname,
+                        Nation = t.Nation,
+                        LicenseNumber = t.Passnummer,
+                        Startnummer = t.Startnummer
+                    };
+                    foreach (var wertung in t.Wertungen)
+                    {
+                        var w = new Wertung() { Nummer = wertung.Nummer };
+                        foreach (var v in wertung.Werte)
+                        {
+                            w.AddVersuch(v);
+                        } 
+                    }
 
-                teambewerb.Teams.First(t => t == game.TeamA).AddGame(game);
-                teambewerb.Teams.First(t => t == game.TeamB).AddGame(game);
+                    bewerb.AddTeilnehmer(tln);
+                }
+
+                turnier.Wettbewerb = bewerb;
             }
-
-            turnier.Wettbewerb = teambewerb;
             return turnier;
         }
+
+
+
+
+
+        #region OrgaDaten
+
+        [XmlElement(Order = 1)]
+        public OrgaDaten Organisation { get; set; }
+
+        [XmlElement(Order = 2)]
+        public int SpielGruppe { get; set; }
+
+        [XmlElement(Order = 3)]
+        public string Wettbewerbsart { get; set; }
+
+        #endregion
+
+        #region TeamBewerb
+
+        [XmlElement(Order = 11)]
+        public bool StartingTeamChange { get; set; }
+
+        [XmlElement(Order = 12)]
+        public bool Is8TurnsGame { get; set; }
+
+        [XmlElement(Order = 13)]
+        public bool IsDirectionOfCourtsFromRightToLeft { get; set; }
+
+        [XmlElement(Order = 14)]
+        public bool TwoPauseGames { get; set; }
+
+        [XmlElement(Order = 15)]
+        public int NumberOfGameRounds { get; set; }
+
+        [XmlElement(Order = 16)]
+        public int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
+
+        [XmlArray(ElementName = "Teams", Order = 17)]
+        [XmlArrayItem(nameof(Team))]
+        public List<Team> XTeams { get; set; }
+
+        [XmlArray(ElementName = nameof(Games), Order = 18)]
+        [XmlArrayItem(nameof(Game))]
+        public List<Game> Games { get; set; }
+
+
+        #region unused
 
         [XmlIgnore()]
         [Obsolete("not available in serialization", true)]
@@ -108,63 +188,116 @@ namespace StockApp.BaseClasses
         }
 
 
-        [XmlElement(Order = 2)]
-        public string TournamentName { get; set; }
-
-        [XmlElement(Order = 3)]
-        public string Venue { get; set; }
-
-        [XmlElement(Order = 4)]
-        public string Operator { get; set; }
-
-        [XmlElement(Order = 5)]
-        public string Organizer { get; set; }
-
-        [XmlElement(Order = 6)]
-        public DateTime DateOfTournament { get; set; }
-
-        [XmlElement(Order = 7)]
-        public Startgebuehr EntryFee { get; set; }
-
-        [XmlElement(Order = 8)]
-        public bool StartingTeamChange { get; set; }
-
-        [XmlElement(Order = 9)]
-        public bool Is8TurnsGame { get; set; }
-
-        [XmlElement(Order = 10)]
-        public bool IsDirectionOfCourtsFromRightToLeft { get; set; }
-
-        [XmlElement(Order = 11)]
-        public bool TwoPauseGames { get; set; }
-
-        [XmlElement(Order = 12)]
-        public int NumberOfGameRounds { get; set; }
-
-        [XmlElement(Order = 13)]
-        public int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
-
-        [XmlElement(Order = 14)]
-        public Rechenbuero ComputingOfficer { get; set; }
-
-        [XmlElement(Order = 15)]
-        public Schiedsrichter Referee { get; set; }
-
-        [XmlElement(Order = 16)]
-        public Wettbewerbsleiter CompetitionManager { get; set; }
-
-        [XmlElement(Order = 17)]
-        public int SpielGruppe { get; set; }
+        #endregion
 
 
-        [XmlArray(ElementName = "Teams", Order = 90)]
-        [XmlArrayItem(nameof(Team))]
-        public List<Team> XTeams { get; set; }
 
-        [XmlArray(ElementName = nameof(Games), Order = 100)]
-        [XmlArrayItem(nameof(Game))]
-        public List<Game> Games { get; set; }
+        #endregion
 
 
+        #region ZielBewerb
+
+        [XmlArrayItem(nameof(Teilnehmer))]
+        [XmlArray(ElementName = nameof(Teilnehmerliste), Order = 200)]
+        public List<XMLTeilnehmer> XTeilnehmerliste { get; set; }
+
+
+
+
+
+
+        #region unused
+        [XmlIgnore]
+        public IOrderedEnumerable<Teilnehmer> Teilnehmerliste => throw new NotImplementedException();
+
+        [XmlIgnore]
+        public IOrderedEnumerable<int> Bahnen => throw new NotImplementedException();
+
+        [XmlIgnore]
+        public IOrderedEnumerable<int> FreieBahnen => throw new NotImplementedException();
+
+        public void AddNewTeilnehmer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CanAddTeilnehmer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveTeilnehmer(Teilnehmer teilnehmer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CanRemoveTeilnehmer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MoveTeilnehmer(int oldIndex, int newIndex)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #endregion
     }
+
+    public class XMLTeilnehmer
+    {
+        public string Vorname { get; set; }
+        public string Nachname { get; set; }
+        public string Nation { get; set; }
+        public string Passnummer { get; set; }
+        public int Startnummer { get; set; }
+        public string Vereinsname { get; set; }
+        public List<XMLZielbewerbWertung> Wertungen { get; set; }
+        public XMLTeilnehmer(Teilnehmer t)
+        {
+            this.Vorname = t.FirstName;
+            this.Nachname = t.LastName;
+            this.Nation = t.Nation;
+            this.Passnummer = t.LicenseNumber;
+            this.Startnummer = t.Startnummer;
+            this.Vereinsname = t.Vereinsname;
+            Wertungen = new List<XMLZielbewerbWertung>();
+            foreach (var w in t.Wertungen)
+            {
+                Wertungen.Add(new XMLZielbewerbWertung(w));
+            }
+
+        }
+        public XMLTeilnehmer()
+        {
+
+        }
+    }
+
+    public class XMLZielbewerbWertung
+    {
+        public List<int> Werte { get; set; }
+        public int Nummer { get; set; }
+
+        public XMLZielbewerbWertung()
+        {
+
+        }
+
+        public XMLZielbewerbWertung(Wertung wertung)
+        {
+            Nummer = wertung.Nummer;
+            Werte = new List<int>();
+            foreach (var d in wertung.Disziplinen)
+            {
+                foreach (var w in d.GetVersuche())
+                {
+                    Werte.Add(w);
+                }
+            }
+        }
+    }
+
+
 }

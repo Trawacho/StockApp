@@ -93,6 +93,18 @@ namespace StockApp.BaseClasses.Zielschiessen
             return VersucheCount() == 24;
         }
 
+        internal bool AddVersuch(int value)
+        {
+            foreach (var d in Disziplinen)
+            {
+                if (d.AddVersuch(value))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         #region READONLY  Punkte
 

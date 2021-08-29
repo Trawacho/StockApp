@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace StockApp.BaseClasses.Zielschiessen
@@ -131,6 +133,14 @@ namespace StockApp.BaseClasses.Zielschiessen
             return versuche.Where(v => v >= 0).Count();
         }
 
+        internal IEnumerable<int> GetVersuche()
+        {
+            foreach (var v in versuche)
+            {
+                yield return v;
+            }
+        }
+
         #endregion
 
         #region Private
@@ -159,6 +169,20 @@ namespace StockApp.BaseClasses.Zielschiessen
             RaisePropertyChanged(nameof(Summe));
         }
 
+
+        internal bool AddVersuch(int value)
+        {
+            if (VersucheCount() < 6)
+            {
+                versuche[VersucheCount()] = value;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
 
         /// <summary>
         /// Prüft, ob der Wert in einem Schuss-Versuch gültig ist
