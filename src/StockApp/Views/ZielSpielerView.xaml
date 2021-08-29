@@ -322,6 +322,7 @@
 
                 <DataGrid ItemsSource="{Binding Path=SelectedWertung.Disziplinen}"
                           x:Name="dgDisziplinen"
+                          IsReadOnly="{Binding Path=SelectedWertung.IsOnline}"
                           SelectionMode="Single"
                           RowHeaderWidth="0"
                           CanUserReorderColumns="False"
