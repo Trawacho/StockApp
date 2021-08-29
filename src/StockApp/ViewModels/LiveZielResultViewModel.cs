@@ -2,31 +2,26 @@
 using StockApp.BaseClasses.Zielschiessen;
 using StockApp.Commands;
 using StockApp.Dialogs;
+using StockApp.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace StockApp.ViewModels
 {
-    public class LiveZielResultViewModel : BaseViewModel, IDialogRequestClose, IDisposable
+    public class LiveZielResultViewModel : BaseViewModel, ILiveZielResultDesignViewModel, IDialogRequestClose, IDisposable
     {
         public event EventHandler<DialogCloseRequestedEventArgs> DialogCloseRequested;
         public event EventHandler<WindowCloseRequestedEventArgs> WindowCloseRequested;
 
-        readonly Turnier turnier;
         readonly Zielbewerb bewerb;
         readonly NetworkService networkService;
 
         public LiveZielResultViewModel(Turnier turnier)
         {
-            this.turnier = turnier;
-            this.bewerb = turnier.Wettbewerb as Zielbewerb;
-            this.networkService = NetworkService.Instance;
-            this.bewerb.PropertyChanged += Bewerb_PropertyChanged;
+            bewerb = turnier.Wettbewerb as Zielbewerb;
+            networkService = NetworkService.Instance;
+            bewerb.PropertyChanged += Bewerb_PropertyChanged;
             networkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
         }
 
@@ -119,7 +114,7 @@ namespace StockApp.ViewModels
         }
     }
 
-    public class LiveZielResultDesignViewModel
+    public class LiveZielResultDesignViewModel : ILiveZielResultDesignViewModel
     {
         public LiveZielResultDesignViewModel()
         {

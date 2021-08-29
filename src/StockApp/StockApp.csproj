@@ -234,6 +234,7 @@
     <Compile Include="ValidationRules\ZielbewerbValueValidationRule.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\GamesViewModel.cs" />
+    <Compile Include="Interfaces\ILiveZielResultDesignViewModel.cs" />
     <Compile Include="ViewModels\LiveResultViewModel.cs" />
     <Compile Include="ViewModels\LiveZielResultViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
