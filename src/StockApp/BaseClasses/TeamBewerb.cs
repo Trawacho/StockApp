@@ -499,7 +499,7 @@ namespace StockApp.BaseClasses
              * dann der Wert der rechten Mannschaft
              * 
              */
-
+            if (telegram.StockTVModus == 100) return;
             if (telegram.Equals(lastTelegram)) return;
             lastTelegram = telegram.Copy();
 
