@@ -155,6 +155,7 @@ namespace StockApp.BaseClasses.Zielschiessen
         private NetworkTelegram lastTelegram;
         public override void SetBroadcastData(NetworkTelegram telegram)
         {
+            if (telegram.StockTVModus != 100) return;
             if (telegram.Equals(lastTelegram)) return;
             lastTelegram = telegram.Copy();
 
