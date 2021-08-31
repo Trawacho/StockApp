@@ -26,6 +26,22 @@ namespace StockApp.BaseClasses
 
         public byte SpielGruppe => telegram[1];
 
+        /// <summary>
+        /// Wert kommt aus StockTV GameSettings.GameModis
+        /// <br>0 = Training</br>
+        /// <br>1 = BestOf</br>
+        /// <br>2 = Turnier</br>
+        /// <br>100 = Ziel</br>
+        /// </summary>
+        public byte StockTVModus => telegram[2];
+
+        /// <summary>
+        /// <para>Wert aus StockTV ColorScheme.NextBahnModis</para>
+        /// <br>0 = Links</br>
+        /// <br>1 = Rechts</br>
+        /// </summary>
+        public byte Spielrichtung => telegram[3];
+
         public bool Equals(NetworkTelegram other)
         {
             if (other == null) return false;
