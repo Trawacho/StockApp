@@ -115,14 +115,26 @@ namespace StockApp.ViewModels
 
         private void SetNewTurnier(Turnier t)
         {
-            if (this._turnier != null)
-                this._turnier.PropertyChanged -= Turnier_PropertyChanged;
+            if (_turnier != null)
+            {
+                _turnier.PropertyChanged -= Turnier_PropertyChanged;
+                _turnier.SpielgruppeChanged -= Turnier_SpielgruppeChanged;
+            }
 
-            this._turnier = t;
-            t.Wettbewerb = new TeamBewerb();
+            _turnier = t;
+            t.SetBewerb(Wettbewerbsart.Team);
+            
+            RaisePropertyChanged(nameof(IsZielBewerb));
+            RaisePropertyChanged(nameof(IsTeamBewerb));
             ViewModel = new TurnierViewModel(_turnier);
             RaisePropertyChanged(nameof(WindowTitle));
-            this._turnier.PropertyChanged += Turnier_PropertyChanged;
+            _turnier.PropertyChanged += Turnier_PropertyChanged;
+            _turnier.SpielgruppeChanged += Turnier_SpielgruppeChanged;
+        }
+
+        private void Turnier_SpielgruppeChanged(object sender, EventArgs e)
+        {
+            RaisePropertyChanged(nameof(WindowTitle));
         }
 
         private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
@@ -166,10 +178,6 @@ namespace StockApp.ViewModels
                 RaisePropertyChanged(nameof(this.IsTeamBewerb));
                 RaisePropertyChanged(nameof(this.IsZielBewerb));
             }
-            else if (e.PropertyName == nameof(Turnier.SpielGruppe))
-            {
-                RaisePropertyChanged(nameof(WindowTitle));
-            }
         }
 
 
@@ -178,11 +186,12 @@ namespace StockApp.ViewModels
         {
             get
             {
-                if (this._turnier.SpielGruppe == 0)
+                if ((_turnier.Wettbewerb is TeamBewerb t && t.SpielGruppe == 0) ||
+                    _turnier.Wettbewerb is Zielbewerb)
                     return "StockApp";
                 else
                 {
-                    return $"StockApp --> Gruppe:{_turnier.SpielGruppeString()}";
+                    return $"StockApp --> Gruppe:{(_turnier.Wettbewerb as TeamBewerb).SpielGruppeString()}";
                 }
             }
         }
@@ -244,7 +253,7 @@ namespace StockApp.ViewModels
                                 new LiveZielResultViewModel(_turnier)
                                 );
                     },
-                    (p) => 
+                    (p) =>
                     {
                         return true;
                     }

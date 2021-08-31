@@ -49,7 +49,10 @@ namespace StockApp.Interfaces
         /// </summary>
         int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
 
-        
+
+        int SpielGruppe { get; set; }
+        string SpielGruppeString();
+
     }
 }
 

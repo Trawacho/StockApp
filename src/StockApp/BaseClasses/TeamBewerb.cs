@@ -27,7 +27,7 @@ namespace StockApp.BaseClasses
         /// <summary>
         /// Anzahl der Stockbahnen / Spielfächen
         /// </summary>
-        public int NumberOfCourts=>  Teams.Count(t => !t.IsVirtual) / 2; 
+        public int NumberOfCourts => Teams.Count(t => !t.IsVirtual) / 2;
 
         /// <summary>
         /// Number of rounds to play (default 1) 
@@ -61,8 +61,7 @@ namespace StockApp.BaseClasses
             get
             {
                 return Teams.Count(t => !t.IsVirtual) % 2 == 0
-                                        ? _twoPauseGames
-                                        : false;
+                            && _twoPauseGames;
             }
             set
             {
@@ -87,7 +86,40 @@ namespace StockApp.BaseClasses
         /// </summary>
         public int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
 
-       
+
+        private int spielGruppe;
+
+        /// <summary>
+        /// Nummer der Gruppe, wenn mehrere Gruppen gleichzeitig auf der Spielfläche sind
+        /// 
+        /// Default: 0
+        /// </summary>
+        public int SpielGruppe
+        {
+            get => this.spielGruppe;
+            set
+            {
+                this.spielGruppe = value;
+                RaisePropertyChanged();
+            }
+        }
+        public string SpielGruppeString()
+        {
+            return SpielGruppe switch
+            {
+                1 => "A",
+                2 => "B",
+                3 => "C",
+                4 => "D",
+                5 => "E",
+                6 => "F",
+                7 => "G",
+                8 => "H",
+                9 => "I",
+                10 => "J",
+                _ => string.Empty,
+            };
+        }
 
         #endregion
 
@@ -105,7 +137,6 @@ namespace StockApp.BaseClasses
             this._teams = new List<Team>();
             this.Teams = _teams.AsReadOnly();
             this.NumberOfTeamsWithNamedPlayerOnResult = 3;
-
         }
 
         #endregion
@@ -483,7 +514,7 @@ namespace StockApp.BaseClasses
                 byte groupNumber = telegram.SpielGruppe;        // Default 0
                 var courtGames = GetGamesOfCourt(bahnNumber);   //Alle Spiele im Turnier auf dieser Bahn
 
-                
+
                 int spielZähler = 1;
 
                 //Jedes verfügbare Spiel im Datagramm durchgehen, i+2, da jedes Spiel 2 Bytes braucht. Im ersten Byte der Wert für Link, das zweite Byte für den Wert rechts

@@ -1,62 +1,77 @@
-﻿using StockApp.Interfaces;
+﻿using StockApp.BaseClasses.Zielschiessen;
+using StockApp.Interfaces;
+using System;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace StockApp.BaseClasses
 {
+    public delegate void SpielgruppeChangedEventHandler(object sender, EventArgs e);
+
     public class Turnier : TBaseClass, ITurnier
     {
+
+        public event SpielgruppeChangedEventHandler SpielgruppeChanged;
+        protected virtual void RaiseSpielgruppeChanged()
+        {
+            SpielgruppeChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         /// <summary>
         /// Organisatorische Daten jedes Turniers
         /// </summary>
         public OrgaDaten OrgaDaten { get; set; }
 
-        private int spielGruppe;
+        private readonly TeamBewerb teambewerb;
+        private readonly Zielbewerb zielbewerb;
 
-        /// <summary>
-        /// Nummer der Gruppe, wenn mehrere Gruppen gleichzeitig auf der Spielfläche sind
-        /// 
-        /// Default: 0
-        /// </summary>
-        public int SpielGruppe
-        {
-            get => this.spielGruppe;
-            set
-            {
-                this.spielGruppe = value;
-                RaisePropertyChanged();
-            }
-        }
-        public string SpielGruppeString()
-        {
-            switch (SpielGruppe)
-            {
-                case 1:
-                    return "A";
-                case 2:
-                    return "B";
-                case 3:
-                    return "C";
-                case 4:
-                    return "D";
-                case 5:
-                    return "E";
-                case 6:
-                    return "F";
-                case 7:
-                    return "G";
-                case 8:
-                    return "H";
-                case 9:
-                    return "I";
-                case 10:
-                    return "J";
-                case 0:
-                default:
-                    return string.Empty;
-            }
-        }
+
+        //private int spielGruppe;
+
+        ///// <summary>
+        ///// Nummer der Gruppe, wenn mehrere Gruppen gleichzeitig auf der Spielfläche sind
+        ///// 
+        ///// Default: 0
+        ///// </summary>
+        //public int SpielGruppe
+        //{
+        //    get => this.spielGruppe;
+        //    set
+        //    {
+        //        this.spielGruppe = value;
+        //        RaisePropertyChanged();
+        //    }
+        //}
+        //public string SpielGruppeString()
+        //{
+        //    switch (SpielGruppe)
+        //    {
+        //        case 1:
+        //            return "A";
+        //        case 2:
+        //            return "B";
+        //        case 3:
+        //            return "C";
+        //        case 4:
+        //            return "D";
+        //        case 5:
+        //            return "E";
+        //        case 6:
+        //            return "F";
+        //        case 7:
+        //            return "G";
+        //        case 8:
+        //            return "H";
+        //        case 9:
+        //            return "I";
+        //        case 10:
+        //            return "J";
+        //        case 0:
+        //        default:
+        //            return string.Empty;
+        //    }
+        //}
 
 
         private IBaseBewerb _wettbewerb;
@@ -69,7 +84,7 @@ namespace StockApp.BaseClasses
             {
                 return _wettbewerb;
             }
-            set
+            private set
             {
                 if (value == _wettbewerb)
                     return;
@@ -85,8 +100,27 @@ namespace StockApp.BaseClasses
         public Turnier()
         {
             this.OrgaDaten = new OrgaDaten();
+
+            teambewerb = new TeamBewerb();
+            teambewerb.PropertyChanged += Teambewerb_PropertyChanged;
+
+            zielbewerb = new Zielbewerb();
         }
 
+        private void Teambewerb_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TeamBewerb.SpielGruppe))
+                RaiseSpielgruppeChanged();
+        }
+
+        public void SetBewerb(Wettbewerbsart art)
+        {
+            this.Wettbewerb = art == Wettbewerbsart.Team
+                ? teambewerb
+                : zielbewerb;
+
+            RaiseSpielgruppeChanged();
+        }
 
 
 

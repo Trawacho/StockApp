@@ -8,33 +8,33 @@ namespace StockApp.BaseClasses.Zielschiessen
 
         public static Turnier GetSampleZielBewerbTurnier()
         {
-            Turnier t = new Turnier
+            Turnier turnier = new Turnier
             {
                 OrgaDaten = new OrgaDaten()
             };
+            turnier.SetBewerb(Wettbewerbsart.Ziel);
 
-            var bewerb = new Zielbewerb();
+            var bewerb = turnier.Wettbewerb as Zielbewerb;
             bewerb.AddNewTeilnehmer();
             bewerb.AddNewTeilnehmer();
             bewerb.AddNewTeilnehmer();
             bewerb.AddNewTeilnehmer();
             bewerb.AddNewTeilnehmer();
 
-            var t1 = bewerb.Teilnehmerliste.First(t => t.Startnummer == 1);
-            t1.FirstName = "Hans";
-            t1.LastName = "Dampf";
-            t1.Vereinsname = "ESF Hankofen";
-            t1.LicenseNumber = "02/85859";
-            t1.AddNewWertung();
-            t1.AddNewWertung();
-            t1.AddNewWertung();
-            t1.AddNewWertung();
+            var teilnehmer = bewerb.Teilnehmerliste.First(t => t.Startnummer == 1);
+            teilnehmer.FirstName = "Hans";
+            teilnehmer.LastName = "Dampf";
+            teilnehmer.Vereinsname = "ESF Hankofen";
+            teilnehmer.LicenseNumber = "02/85859";
+            teilnehmer.AddNewWertung();
+            teilnehmer.AddNewWertung();
+            teilnehmer.AddNewWertung();
+            teilnehmer.AddNewWertung();
 
-            t1.SetAktuelleBahn(1, 1);
+            teilnehmer.SetAktuelleBahn(1, 1);
 
-            t.Wettbewerb = bewerb;
 
-            return t;
+            return turnier;
         }
        
     }

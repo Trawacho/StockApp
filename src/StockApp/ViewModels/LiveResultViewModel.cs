@@ -100,11 +100,12 @@ namespace StockApp.ViewModels
         {
             get
             {
-                if (this.turnier.SpielGruppe == 0)
+                var w = turnier.Wettbewerb as TeamBewerb;
+                if (w.SpielGruppe == 0)
                     return "StockApp Live-Ergebnis";
                 else
                 {
-                    return $"StockApp Live-Ergebnis --> Gruppe:{this.turnier.SpielGruppeString()}";
+                    return $"StockApp Live-Ergebnis --> Gruppe:{w.SpielGruppeString()}";
                 }
             }
         }

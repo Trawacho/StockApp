@@ -14,8 +14,9 @@
 
     <UserControl.Resources>
         <conv:RadioBoolToIntConverter x:Key="radioButtonToGameGroupConverter"/>
+        <conv:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </UserControl.Resources>
-    
+
     <Grid Margin="20,10">
 
         <Grid.ColumnDefinitions>
@@ -120,6 +121,7 @@
         <Label Content="Art des Bewerbs:"
                Grid.Row="7" Grid.Column="0"/>
         <ComboBox Grid.Row="7" Grid.Column="1" Margin="5" 
+                  x:Name="comboboxWettbewerb"
                   ItemsSource="{Binding Path=Wettbewerbsarten}"
                   SelectedItem="{Binding Path=Wettbewerbsart}"/>
 
@@ -186,13 +188,16 @@
                      Margin="0,5,5,5" Padding="5,0"
                      Text="{Binding Path=Rechenbuero.ClubName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </Grid>
-        
-        <Label Content="Spielgruppe:" Grid.Row="11" Grid.Column="0"/>
+
+        <Label Content="Spielgruppe:" Grid.Row="11" Grid.Column="0"
+               Visibility="{Binding Path=IsSpielgruppeVisible, Converter={StaticResource BoolToVisibilityConverter}}"/>
         <StackPanel Grid.Row="11" Grid.Column="1"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Stretch"
-                    Margin="5">
+                    Margin="5"
+                    Visibility="{Binding Path=IsSpielgruppeVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+           
             <StackPanel.Resources>
                 <Style TargetType="RadioButton">
                     <Setter Property="Margin" Value="0,0,7,0"/>
@@ -200,6 +205,7 @@
                     <Setter Property="VerticalContentAlignment" Value="Center"/>
                 </Style>
             </StackPanel.Resources>
+           
             <RadioButton Content="-" 
                          IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=0}"/>
             <RadioButton Content="A" 
@@ -222,9 +228,9 @@
                          IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=9}"/>
             <RadioButton Content="J" 
                          IsChecked="{Binding Path=SpielGruppe, Converter={StaticResource radioButtonToGameGroupConverter}, ConverterParameter=10}"/>
-            
+
         </StackPanel>
-        
+
 
     </Grid>
 

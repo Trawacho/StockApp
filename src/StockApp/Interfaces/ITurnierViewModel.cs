@@ -24,5 +24,6 @@ namespace StockApp.Interfaces
         Rechenbuero Rechenbuero { get; set; }
         Wettbewerbsart Wettbewerbsart { get; set; }
         List<Wettbewerbsart> Wettbewerbsarten { get; }
+        bool IsSpielgruppeVisible { get; }
     }
 }

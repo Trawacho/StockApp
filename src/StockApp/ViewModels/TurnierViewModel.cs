@@ -188,14 +188,14 @@ namespace StockApp.ViewModels
             {
                 if (value == Wettbewerbsart.Ziel)
                 {
-                    this.Turnier.Wettbewerb = new Zielbewerb();
-
+                    Turnier.SetBewerb(Wettbewerbsart.Ziel);
                 }
                 else
                 {
-                    this.Turnier.Wettbewerb = new TeamBewerb();
+                    Turnier.SetBewerb(Wettbewerbsart.Team);
                 }
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(IsSpielgruppeVisible));
             }
         }
 
@@ -207,14 +207,21 @@ namespace StockApp.ViewModels
         {
             get
             {
-                return Turnier.SpielGruppe;
+                return Turnier.Wettbewerb is TeamBewerb t 
+                    ? t.SpielGruppe 
+                    : 0;
             }
             set
             {
-                Turnier.SpielGruppe = value;
+                if (Turnier.Wettbewerb is TeamBewerb t)
+                {
+                    t.SpielGruppe = value;
+                }
                 RaisePropertyChanged();
             }
         }
+
+        public bool IsSpielgruppeVisible => Wettbewerbsart == Wettbewerbsart.Team;
     }
 
     public class TurnierDesignViewModel : ITurnierViewModel
@@ -244,6 +251,8 @@ namespace StockApp.ViewModels
         public List<Wettbewerbsart> Wettbewerbsarten { get; set; }
 
         public Wettbewerbsart Wettbewerbsart { get; set; }
+
+        public bool IsSpielgruppeVisible { get; } = true;
     }
 
 

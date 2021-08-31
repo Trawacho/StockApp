@@ -31,7 +31,7 @@ namespace StockApp.BaseClasses
                                      .ThenBy(c => c.CourtNumber)
                                      .ToList();
 
-                this.SpielGruppe = turnier.SpielGruppe;
+                this.SpielGruppe = teamBewerb.SpielGruppe;
                 this.StartingTeamChange = teamBewerb.StartingTeamChange;
                 this.Is8TurnsGame = teamBewerb.Is8TurnsGame;
                 this.IsDirectionOfCourtsFromRightToLeft = teamBewerb.IsDirectionOfCourtsFromRightToLeft;
@@ -52,23 +52,24 @@ namespace StockApp.BaseClasses
 
         public Turnier GetTurnier()
         {
-            Turnier turnier = new Turnier();
-            turnier.OrgaDaten = this.Organisation;
+            Turnier turnier = new Turnier
+            {
+                OrgaDaten = this.Organisation
+            };
 
-            turnier.SpielGruppe = this.SpielGruppe;
+
 
             if (Wettbewerbsart == nameof(TeamBewerb))
             {
-
-                TeamBewerb teambewerb = new TeamBewerb
-                {
-                    Is8TurnsGame = this.Is8TurnsGame,
-                    IsDirectionOfCourtsFromRightToLeft = this.IsDirectionOfCourtsFromRightToLeft,
-                    TwoPauseGames = this.TwoPauseGames,
-                    NumberOfGameRounds = this.NumberOfGameRounds,
-                    NumberOfTeamsWithNamedPlayerOnResult = this.NumberOfTeamsWithNamedPlayerOnResult,
-                    StartingTeamChange = this.StartingTeamChange,
-                };
+                turnier.SetBewerb(BaseClasses.Wettbewerbsart.Team);
+                TeamBewerb teambewerb = turnier.Wettbewerb as TeamBewerb;
+                teambewerb.Is8TurnsGame = this.Is8TurnsGame;
+                teambewerb.IsDirectionOfCourtsFromRightToLeft = this.IsDirectionOfCourtsFromRightToLeft;
+                teambewerb.TwoPauseGames = this.TwoPauseGames;
+                teambewerb.NumberOfGameRounds = this.NumberOfGameRounds;
+                teambewerb.NumberOfTeamsWithNamedPlayerOnResult = this.NumberOfTeamsWithNamedPlayerOnResult;
+                teambewerb.StartingTeamChange = this.StartingTeamChange;
+                teambewerb.SpielGruppe = this.SpielGruppe;
 
                 teambewerb.RemoveAllTeams();
 
@@ -86,11 +87,12 @@ namespace StockApp.BaseClasses
                     teambewerb.Teams.First(t => t == game.TeamB).AddGame(game);
                 }
 
-                turnier.Wettbewerb = teambewerb;
             }
             else if (Wettbewerbsart == nameof(Zielbewerb))
             {
-                var bewerb = new Zielbewerb();
+                turnier.SetBewerb(BaseClasses.Wettbewerbsart.Ziel);
+                var bewerb = turnier.Wettbewerb as Zielbewerb;
+
                 foreach (var t in this.XTeilnehmerliste)
                 {
                     var tln = new Teilnehmer()
@@ -108,13 +110,12 @@ namespace StockApp.BaseClasses
                         foreach (var v in wertung.Werte)
                         {
                             w.AddVersuch(v);
-                        } 
+                        }
                     }
 
                     bewerb.AddTeilnehmer(tln);
                 }
 
-                turnier.Wettbewerb = bewerb;
             }
             return turnier;
         }
@@ -128,15 +129,14 @@ namespace StockApp.BaseClasses
         [XmlElement(Order = 1)]
         public OrgaDaten Organisation { get; set; }
 
-        [XmlElement(Order = 2)]
-        public int SpielGruppe { get; set; }
-
         [XmlElement(Order = 3)]
         public string Wettbewerbsart { get; set; }
 
         #endregion
 
         #region TeamBewerb
+        [XmlElement(Order = 10)]
+        public int SpielGruppe { get; set; }
 
         [XmlElement(Order = 11)]
         public bool StartingTeamChange { get; set; }
@@ -187,6 +187,10 @@ namespace StockApp.BaseClasses
             }
         }
 
+        public string SpielGruppeString()
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
 
@@ -240,6 +244,8 @@ namespace StockApp.BaseClasses
         {
             throw new NotImplementedException();
         }
+
+
         #endregion
 
         #endregion
