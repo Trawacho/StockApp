@@ -131,7 +131,7 @@
     <Compile Include="BaseClasses\EnumUtil.cs" />
     <Compile Include="BaseClasses\Executive.cs" />
     <Compile Include="BaseClasses\ExtensionMethods.cs" />
-    <Compile Include="BaseClasses\NetworkTelegram.cs" />
+    <Compile Include="BaseClasses\Broadcasting\NetworkTelegram.cs" />
     <Compile Include="Converters\TupleValue_ZielSpieler_Converter.cs" />
     <Compile Include="Interfaces\IZielbewerb.cs" />
     <Compile Include="Interfaces\IBaseBewerb.cs" />
@@ -152,8 +152,8 @@
     <Compile Include="BaseClasses\Networking\StockTVSettingsMessage.cs" />
     <Compile Include="BaseClasses\Networking\MDnsServiceInfo.cs" />
     <Compile Include="BaseClasses\Networking\StockTVSubscriberClient.cs" />
-    <Compile Include="BaseClasses\NetworkServiceStateEventArgs.cs" />
-    <Compile Include="BaseClasses\NetworkServiceDataReceivedEventArgs.cs" />
+    <Compile Include="BaseClasses\Broadcasting\NetworkServiceStateEventArgs.cs" />
+    <Compile Include="BaseClasses\Broadcasting\NetworkServiceDataReceivedEventArgs.cs" />
     <Compile Include="BaseClasses\OrgaDaten.cs" />
     <Compile Include="BaseClasses\Startgebuehr.cs" />
     <Compile Include="BaseClasses\TBaseBewerb.cs" />
@@ -179,7 +179,7 @@
     <Compile Include="BaseClasses\SerializableTurnier.cs" />
     <Compile Include="BaseClasses\TBaseClass.cs" />
     <Compile Include="BaseClasses\Game.cs" />
-    <Compile Include="BaseClasses\NetworkService.cs" />
+    <Compile Include="BaseClasses\Broadcasting\NetworkService.cs" />
     <Compile Include="BaseClasses\Player.cs" />
     <Compile Include="BaseClasses\Settings.cs" />
     <Compile Include="BaseClasses\Team.cs" />
