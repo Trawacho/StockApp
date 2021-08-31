@@ -131,6 +131,7 @@
     <Compile Include="BaseClasses\EnumUtil.cs" />
     <Compile Include="BaseClasses\Executive.cs" />
     <Compile Include="BaseClasses\ExtensionMethods.cs" />
+    <Compile Include="BaseClasses\NetworkTelegram.cs" />
     <Compile Include="Converters\TupleValue_ZielSpieler_Converter.cs" />
     <Compile Include="Interfaces\IZielbewerb.cs" />
     <Compile Include="Interfaces\IBaseBewerb.cs" />

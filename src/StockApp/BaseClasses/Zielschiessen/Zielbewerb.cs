@@ -85,6 +85,10 @@ namespace StockApp.BaseClasses.Zielschiessen
             AddTeilnehmer(new Teilnehmer());
         }
 
+        /// <summary>
+        /// Einen Teilnehmer anfügen
+        /// </summary>
+        /// <param name="teilnehmer"></param>
         public void AddTeilnehmer(Teilnehmer teilnehmer)
         {
             if (teilnehmer.Startnummer < 1 ||
@@ -148,14 +152,11 @@ namespace StockApp.BaseClasses.Zielschiessen
             RaisePropertyChanged(nameof(this.Teilnehmerliste));
         }
 
-        private byte[] lastReceivedData;
-        public override void SetBroadcastData(byte[] data)
+        private NetworkTelegram lastTelegram;
+        public override void SetBroadcastData(NetworkTelegram telegram)
         {
-            if (data == null) return;
-
-            if (data.SequenceEqual(lastReceivedData ?? new byte[0])) return;
-            lastReceivedData = new byte[data.Length];
-            Array.Copy(data, 0, lastReceivedData, 0, data.Length);
+            if (telegram.Equals(lastTelegram)) return;
+            lastTelegram = telegram.Copy();
 
             /*
              * 03 01 00 00 00 00 00 00 00 00 04 08 00 06 10 02 05 10 02 00 10 
@@ -169,19 +170,14 @@ namespace StockApp.BaseClasses.Zielschiessen
 
             try
             {
-                const int headerLength = 10;
-                byte[] header = new byte[headerLength];
-                Array.Copy(data, 0, header, 0, headerLength);
-
-                byte[] values = new byte[data.Length - headerLength];
-                Array.Copy(data, headerLength, values, 0, data.Length - headerLength);
+         
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
+                System.Diagnostics.Debug.WriteLine($"Bahnnummer:{telegram.BahnNummer} -- {string.Join("-", telegram.Values)}");
 #endif
 
-                if (this.Teilnehmerliste.FirstOrDefault(t => t.AktuelleBahn == header[0]) is Teilnehmer spieler)
+                if (this.Teilnehmerliste.FirstOrDefault(t => t.AktuelleBahn == telegram.BahnNummer) is Teilnehmer spieler)
                 {
-                    if (spieler.Onlinewertung.VersucheAllEntered() && values.Length == 0)  //Alle Versuche auf der entsprechenden Bahn wurden eingegeben und von StockTV kommen keine Values, nur der Header
+                    if (spieler.Onlinewertung.VersucheAllEntered() && telegram.Values.Length == 0)  //Alle Versuche auf der entsprechenden Bahn wurden eingegeben und von StockTV kommen keine Values, nur der Header
                     {
                         spieler.SetWertungOfflineOrNext();
                     }
@@ -189,16 +185,16 @@ namespace StockApp.BaseClasses.Zielschiessen
                     {
                         spieler.Onlinewertung.Reset();
 
-                        for (int i = 0; i < values.Length; i++)
+                        for (int i = 0; i < telegram.Values.Length; i++)
                         {
-                            spieler?.SetVersuch(i + 1, values[i]);
+                            spieler?.SetVersuch(i + 1, telegram.Values[i]);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"DeSerializeZielBewerb: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"SetBroadcastData: {ex.Message}");
             }
             finally
             {

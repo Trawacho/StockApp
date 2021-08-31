@@ -453,7 +453,10 @@ namespace StockApp.BaseClasses
 
         }
 
-        public override void SetBroadcastData(byte[] data)
+
+        private NetworkTelegram lastTelegram;
+
+        public override void SetBroadcastData(NetworkTelegram telegram)
         {
             /* 
              * 03 00 15 09 21 07 09 15
@@ -466,36 +469,25 @@ namespace StockApp.BaseClasses
              * 
              */
 
-            if (data == null)
-                return;
+            if (telegram.Equals(lastTelegram)) return;
+            lastTelegram = telegram.Copy();
+
 
             try
             {
 
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"{data.Length} -- Bahnnummer:{data[0]} -- {string.Join("-", data)}");
+                System.Diagnostics.Debug.WriteLine($"Bahnnummer:{telegram.BahnNummer} -- {string.Join("-", telegram.Values)}");
 #endif
-                int bytesToRemove = 1;                          // Ein oder Zwei Bytes, je nach dem, ob eine Spielgruppe mitgesendet wird oder nicht
-                byte bahnNumber = data[0];                      //Im ersten Byte immer die Bahnnummer
-                byte groupNumber = 0;                           //Default 0
+                byte bahnNumber = telegram.BahnNummer;          // Im ersten Byte immer die Bahnnummer
+                byte groupNumber = telegram.SpielGruppe;        // Default 0
                 var courtGames = GetGamesOfCourt(bahnNumber);   //Alle Spiele im Turnier auf dieser Bahn
 
-                //Wenn das Array eine gerade Länge hat, ist im zweiten Byte die Gruppennummer hinterlegt
-                if (data.Length % 2 == 0)
-                {
-                    groupNumber = data[1];
-                    bytesToRemove = 2;
-                }
-
-                //Das erste Byte (die ersten beiden) aus dem Array wird nicht mehr benötigt. Daten in ein neues Array kopieren
-                byte[] newData = new byte[data.Length - bytesToRemove];
-                Array.Copy(data, bytesToRemove, newData, 0, data.Length - bytesToRemove);
-
+                
                 int spielZähler = 1;
 
-
                 //Jedes verfügbare Spiel im Datagramm durchgehen, i+2, da jedes Spiel 2 Bytes braucht. Im ersten Byte der Wert für Link, das zweite Byte für den Wert rechts
-                for (int i = 0; i < newData.Length; i += 2)
+                for (int i = 0; i < telegram.Values.Length; i += 2)
                 {
                     var preGame = courtGames.FirstOrDefault(g => g.GameNumberOverAll == spielZähler - 1);
                     if (preGame != null)
@@ -516,14 +508,14 @@ namespace StockApp.BaseClasses
                         {
                             // TeamA befindet sich bei diesem Spiel auf dieser Bahn rechts, 
                             // das nächste Spiel ist auf einer Bahn mit höherer oder gleicher Bahnnummer (1-> 2-> 3-> 4->...)
-                            game.NetworkTurn.PointsTeamA = newData[i + 1];
-                            game.NetworkTurn.PointsTeamB = newData[i];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i + 1];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i];
                         }
                         else
                         {
                             // TeamA befindet sich bei diesem Spiel auf der Bahn links, das nächste Spiel ist auf einer Bahn mit niedrigerer Bahnnummer (5->4->3->2->1)
-                            game.NetworkTurn.PointsTeamA = newData[i];
-                            game.NetworkTurn.PointsTeamB = newData[i + 1];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i + 1];
                         }
                     }
                     else
@@ -531,14 +523,14 @@ namespace StockApp.BaseClasses
                         if (game.TeamA.SpieleAufStartSeite.Contains(game.GameNumberOverAll))
                         {
                             // TeamA befindet sich in diesem Spiel auf dieser Bahn links, das nächste Spiel ist auf einer Bahn mit einer höheren Bahnnummer
-                            game.NetworkTurn.PointsTeamA = newData[i];
-                            game.NetworkTurn.PointsTeamB = newData[i + 1];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i + 1];
                         }
                         else
                         {
                             // TeamA befindet sich in diesem Spiel auf dieser Bahn rechts, das nächste Spiel ist auf einer Bahn mit einer niedrigeren Bahnnummer
-                            game.NetworkTurn.PointsTeamA = newData[i + 1];
-                            game.NetworkTurn.PointsTeamB = newData[i];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i + 1];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i];
                         }
                     }
 

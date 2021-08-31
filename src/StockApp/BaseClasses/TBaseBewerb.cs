@@ -13,7 +13,7 @@ namespace StockApp.BaseClasses
 
         }
 
-        public abstract void SetBroadcastData(byte[] data);
+        public abstract void SetBroadcastData(NetworkTelegram telegram);
     }
 
    

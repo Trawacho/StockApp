@@ -127,9 +127,7 @@ namespace StockApp.ViewModels
 
         private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
         {
-            if (e.SpielGruppe() == this._turnier.SpielGruppe ||
-                e.SpielGruppe() == 0)
-                this._turnier.Wettbewerb.SetBroadcastData(e.Data);
+            this._turnier.Wettbewerb.SetBroadcastData(e.NetworkTelegram);
         }
 
         private void NetworkService_StartStopStateChanged(object sender, NetworkServiceStateEventArgs e)
