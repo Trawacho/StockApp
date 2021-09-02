@@ -61,34 +61,42 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
 
                     <Label Grid.Row="0" Grid.Column="0" Content="Bahnnummer:" x:Name="labelBahnnummer"/>
                     <TextBox Grid.Row="0" Grid.Column="1" 
                          Text="{Binding ElementName=ucStockTV, Path=BahnNummer}"/>
 
-                    <Label Grid.Row="1" Grid.Column="0" Content="nächte Bahn:" />
+                    <Label Grid.Row="1" Grid.Column="0" Content="Spielgruppe:" x:Name="labelSpielgruppe"/>
+                    <!--<TextBox Grid.Row="1" Grid.Column="1" 
+                         Text="{Binding ElementName=ucStockTV, Path=Spielgruppe, Converter={StaticResource intToStringConverter}}"/>-->
                     <ComboBox Grid.Row="1" Grid.Column="1"
+                              SelectedValue="{Binding ElementName=ucStockTV, Path=SpielgruppeString}"
+                              ItemsSource="{Binding ElementName=ucStockTV, Path=Spielgruppen, Mode=OneWay}"/>
+                    
+                    <Label Grid.Row="2" Grid.Column="0" Content="nächte Bahn:" />
+                    <ComboBox Grid.Row="2" Grid.Column="1"
                       SelectedItem="{Binding ElementName=ucStockTV, Path=NextBahnModus}"          
                       ItemsSource="{Binding ElementName=ucStockTV, Path=NextBahnModis, Mode=OneWay}"/>
 
 
-                    <Label Grid.Row="2" Grid.Column="0" Content="Farbmodus:" />
-                    <ComboBox Grid.Row="2" Grid.Column="1" 
+                    <Label Grid.Row="3" Grid.Column="0" Content="Farbmodus:" />
+                    <ComboBox Grid.Row="3" Grid.Column="1" 
                       SelectedItem="{Binding ElementName=ucStockTV, Path=ColorModus}"
                       ItemsSource="{Binding ElementName=ucStockTV, Path=ColorModis, Mode=OneWay}" />
 
-                    <Label Grid.Row="3" Grid.Column="0" Content="Spielmodus:" />
-                    <ComboBox Grid.Row="3" Grid.Column="1" 
+                    <Label Grid.Row="4" Grid.Column="0" Content="Spielmodus:" />
+                    <ComboBox Grid.Row="4" Grid.Column="1" 
                       SelectedItem="{Binding ElementName=ucStockTV, Path=GameModus}"
                       ItemsSource="{Binding ElementName=ucStockTV, Path=GameModis, Mode=OneWay}"/>
 
-                    <Label Grid.Row="4" Grid.Column="0" Content="max Punkte/Kehre:"  />
-                    <TextBox Grid.Row="4" Grid.Column="1"
+                    <Label Grid.Row="5" Grid.Column="0" Content="max Punkte/Kehre:"  />
+                    <TextBox Grid.Row="5" Grid.Column="1"
                      Text="{Binding ElementName=ucStockTV, Path=PunkteProKehre}"/>
 
-                    <Label Grid.Row="5" Grid.Column="0" Content="Kehren pro Spiel:"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" 
+                    <Label Grid.Row="6" Grid.Column="0" Content="Kehren pro Spiel:"/>
+                    <TextBox Grid.Row="6" Grid.Column="1" 
                      Text="{Binding ElementName=ucStockTV, Path=KehrenProSpiel}"/>
                 </Grid>
 

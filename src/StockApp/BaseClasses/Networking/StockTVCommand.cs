@@ -47,6 +47,7 @@ namespace StockApp.BaseClasses
             x.commandList.Add(new KeyValuePair<CommandTopics, string>(CommandTopics.PointsPerTurn, tVSettings.PointsPerTurn.ToString()));
             x.commandList.Add(new KeyValuePair<CommandTopics, string>(CommandTopics.NextBahnModus, tVSettings.NextBahnModus.ToString()));
             x.commandList.Add(new KeyValuePair<CommandTopics, string>(CommandTopics.Bahn, tVSettings.Bahn.ToString()));
+            x.commandList.Add(new KeyValuePair<CommandTopics, string>(CommandTopics.Spielgruppe, tVSettings.Spielgruppe.ToString()));
             return x;
         }
 

@@ -15,7 +15,7 @@ namespace StockApp.UserControls.StockTV
     /// </summary>
     public partial class UserControlStockTV : UserControl, INotifyPropertyChanged, IEquatable<UserControlStockTV>, IComparable<UserControlStockTV>
     {
-       
+
         #region IEquatable- and ICompareable Implementation
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace StockApp.UserControls.StockTV
                 RaisePropertyChanged(p.Name);
             }
         }
-     
+
         #endregion
 
         #region Konstruktor
@@ -89,6 +89,10 @@ namespace StockApp.UserControls.StockTV
         {
             get => Enum.GetValues(typeof(BaseClasses.ColorModis)).Cast<BaseClasses.ColorModis>().ToList();
         }
+        public List<string> Spielgruppen
+        {
+            get => new List<string>() { "--", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+        }
 
         public List<BaseClasses.GameModis> GameModis
         {
@@ -112,6 +116,22 @@ namespace StockApp.UserControls.StockTV
                 StockTV.TVSettings.Bahn = value;
                 RaisePropertyChanged();
             }
+        }
+
+        private int Spielgruppe
+        {
+            get => StockTV?.TVSettings.Spielgruppe ?? 0;
+            set
+            {
+                StockTV.TVSettings.Spielgruppe = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(SpielgruppeString));
+            }
+        }
+        public string SpielgruppeString
+        {
+            get => Spielgruppe switch { 1 => "A", 2 => "B", 3 => "C", 4 => "D", 5 => "E", 6 => "F", 7 => "G", 8 => "H", 9 => "I", 10 => "J", 0 or _ => "--" };
+            set => Spielgruppe = value switch { "A" => 1, "B" => 2, "C" => 3, "D" => 4, "E" => 5, "F" => 6, "G" => 7, "H" => 8, "I" => 9, "J" => 10, _ => 0 };
         }
 
         public int PunkteProKehre
@@ -185,7 +205,7 @@ namespace StockApp.UserControls.StockTV
 
         private static void StockTVChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue is BaseClasses.StockTV tv && 
+            if (e.NewValue is BaseClasses.StockTV tv &&
                 o is UserControlStockTV ucTv)
             {
                 tv.StockTVSettingsChanged += ucTv.StockTV_StockTVSettingsChanged;
@@ -194,7 +214,7 @@ namespace StockApp.UserControls.StockTV
             }
         }
 
-        
+
 
         private void StockTV_StockTVOnlineChanged(object sender, bool IsOnline)
         {
@@ -274,7 +294,7 @@ namespace StockApp.UserControls.StockTV
 
         }
 
-       
+
     }
 
 }

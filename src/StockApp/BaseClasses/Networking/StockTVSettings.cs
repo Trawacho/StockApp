@@ -58,7 +58,7 @@ namespace StockApp.BaseClasses
         }
 
         public int Bahn { get => bahn; set => SetProperty(ref bahn, value); }
-        public int SpielGruppe { get => spielgruppe; set => SetProperty(ref spielgruppe, value); }
+        public int Spielgruppe { get => spielgruppe; set => SetProperty(ref spielgruppe, value); }
         public int PointsPerTurn { get => pointsPerTurn; set => SetProperty(ref pointsPerTurn, value); }
         public int TurnsPerGame { get => turnsPerGame; set => SetProperty(ref turnsPerGame, value); }
         public NextBahnModis NextBahnModus { get => nextBahnModus; set => SetProperty(ref nextBahnModus, value); }
@@ -105,7 +105,7 @@ namespace StockApp.BaseClasses
         {
             this.PointsPerTurn = s.PointsPerTurn;
             this.TurnsPerGame = s.TurnsPerGame;
-            this.SpielGruppe = s.SpielGruppe;
+            this.Spielgruppe = s.Spielgruppe;
             this.NextBahnModus = s.NextBahnModus;
             this.GameModus = s.GameModus;
             this.ColorModus = s.ColorModus;
@@ -129,8 +129,8 @@ namespace StockApp.BaseClasses
                     case nameof(Bahn):
                         Bahn = int.Parse(value);
                         break;
-                    case nameof(SpielGruppe):
-                        SpielGruppe = int.Parse(value);
+                    case nameof(Spielgruppe):
+                        Spielgruppe = int.Parse(value);
                         break;
                     case nameof(PointsPerTurn):
                         PointsPerTurn = int.Parse(value);
@@ -160,7 +160,7 @@ namespace StockApp.BaseClasses
 
         public override string ToString()
         {
-            return $"Bahn:{Bahn} | Spielgruppe:{SpielGruppe} | GameModus:{GameModus} | ColorModus:{ColorModus} | PointsPerTurn:{PointsPerTurn} | TurnsPerGame:{TurnsPerGame} | NextBahn:{NextBahnModus}  ";
+            return $"Bahn:{Bahn} | Spielgruppe:{Spielgruppe} | GameModus:{GameModus} | ColorModus:{ColorModus} | PointsPerTurn:{PointsPerTurn} | TurnsPerGame:{TurnsPerGame} | NextBahn:{NextBahnModus}  ";
         }
     }
 }
