@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Text;
 
 namespace StockApp.BaseClasses
@@ -9,6 +8,7 @@ namespace StockApp.BaseClasses
         private int bahn;
         private int pointsPerTurn;
         private int turnsPerGame;
+        private int spielgruppe;
         private NextBahnModis nextBahnModus;
         private GameModis gameModus;
         private ColorModis colorModus;
@@ -58,10 +58,33 @@ namespace StockApp.BaseClasses
         }
 
         public int Bahn { get => bahn; set => SetProperty(ref bahn, value); }
+        public int SpielGruppe { get => spielgruppe; set => SetProperty(ref spielgruppe, value); }
         public int PointsPerTurn { get => pointsPerTurn; set => SetProperty(ref pointsPerTurn, value); }
         public int TurnsPerGame { get => turnsPerGame; set => SetProperty(ref turnsPerGame, value); }
         public NextBahnModis NextBahnModus { get => nextBahnModus; set => SetProperty(ref nextBahnModus, value); }
-        public GameModis GameModus { get => gameModus; set => SetProperty(ref gameModus, value); }
+        public GameModis GameModus
+        {
+            get => gameModus; 
+            set
+            {
+                SetProperty(ref gameModus, value);
+                switch (value)
+                {
+                    case GameModis.Training:
+                        PointsPerTurn = 30;
+                        TurnsPerGame = 30;
+                        break;
+                    case GameModis.Turnier:
+                    case GameModis.BestOf:
+                        PointsPerTurn = 15;
+                        TurnsPerGame = 6;
+                        break;
+                    case GameModis.Ziel:
+                    default:
+                        break;
+                }
+            }
+        }
         public ColorModis ColorModus { get => colorModus; set => SetProperty(ref colorModus, value); }
 
         public bool Equals(StockTVSettings other)
@@ -82,6 +105,7 @@ namespace StockApp.BaseClasses
         {
             this.PointsPerTurn = s.PointsPerTurn;
             this.TurnsPerGame = s.TurnsPerGame;
+            this.SpielGruppe = s.SpielGruppe;
             this.NextBahnModus = s.NextBahnModus;
             this.GameModus = s.GameModus;
             this.ColorModus = s.ColorModus;
@@ -104,6 +128,9 @@ namespace StockApp.BaseClasses
                 {
                     case nameof(Bahn):
                         Bahn = int.Parse(value);
+                        break;
+                    case nameof(SpielGruppe):
+                        SpielGruppe = int.Parse(value);
                         break;
                     case nameof(PointsPerTurn):
                         PointsPerTurn = int.Parse(value);
@@ -133,7 +160,7 @@ namespace StockApp.BaseClasses
 
         public override string ToString()
         {
-            return $"Bahn:{Bahn} | GameModus:{GameModus} | ColorModus:{ColorModus} | PointsPerTurn:{PointsPerTurn} | TurnsPerGame:{TurnsPerGame} | NextBahn:{NextBahnModus}  ";
+            return $"Bahn:{Bahn} | Spielgruppe:{SpielGruppe} | GameModus:{GameModus} | ColorModus:{ColorModus} | PointsPerTurn:{PointsPerTurn} | TurnsPerGame:{TurnsPerGame} | NextBahn:{NextBahnModus}  ";
         }
     }
 }
