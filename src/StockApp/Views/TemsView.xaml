@@ -9,14 +9,23 @@
              d:DataContext="{d:DesignInstance 
                             Type=viewmodels:TeamsDesignviewModel, 
                             IsDesignTimeCreatable=True}" 
-             d:DesignHeight="450" d:DesignWidth="800"
-             >
+                          d:DesignStyle="{StaticResource designBackground}">
+
+
+    <d:DesignerProperties.DesignStyle x:Name="designBackground">
+        <Style TargetType="UserControl">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Width" Value="1024"/>
+            <Setter Property="Height" Value="450"/>
+        </Style>
+    </d:DesignerProperties.DesignStyle>
+
     <UserControl.Resources>
         <converters:ValueNotNullToVisibilityConverter x:Key="ValueNotNullToVisibility"/>
     </UserControl.Resources>
-    
+
     <Grid Margin="20,10">
-        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto"/>
@@ -24,11 +33,29 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.Column="0">
+        <StackPanel Grid.Row="0" Grid.Column="0" Width="400">
             <Label Content="Startliste" FontWeight="Bold" FontSize="18"/>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" 
+                    Orientation="Horizontal" >
+                <Button Content="Hinzufügen" 
+                    Command="{Binding Path=AddTeamCommand}" 
+                    Margin="10" Padding="10"/>
+                <Button Content="Entfernen" 
+                    Command="{Binding Path=RemoveTeamCommand}" 
+                    Margin="10" Padding="10"/>
+                <Button Content="Quittungen"
+                    Command="{Binding Path=PrintQuittungenCommand}"
+                    HorizontalAlignment="Left"
+                    Margin="10" Padding="10" />
+            </StackPanel>
+
+
+
+
 
             <DataGrid Margin="0,10,0,0" 
                   ItemsSource="{Binding Path=Teams}"
@@ -40,161 +67,172 @@
                   CanUserDeleteRows="False"
                   RowHeaderWidth="0"
                   IsReadOnly="True"
-                  Width="{Binding ElementName=stackPanelButtons, Path=ActualWidth}"
                   Background="Transparent"
                   >
-           
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DarkKhaki"/>
+                </DataGrid.Resources>
 
-            <DataGrid.Columns>
+                <DataGrid.Columns>
 
-                <DataGridTextColumn Header="Start#" 
+                    <DataGridTextColumn Header="Start#" 
                                     Binding="{Binding Path=StartNumber}"
                                     Width="auto"
                                     >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="10"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Setter Property="Margin" Value="10"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
 
-                </DataGridTextColumn>
+                    </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Teamname" 
+                    <DataGridTextColumn Header="Teamname" 
                                     Binding="{Binding Path=TeamName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                     Width="*">
 
-                    <DataGridTextColumn.ElementStyle>
+                        <DataGridTextColumn.ElementStyle>
 
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="HorizontalAlignment" Value="Left" />
-                            <Setter Property="Padding" Value="10"/>
-                        </Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="Padding" Value="10"/>
+                            </Style>
 
-                    </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn.ElementStyle>
 
-                </DataGridTextColumn>
+                    </DataGridTextColumn>
 
-            </DataGrid.Columns>
+                </DataGrid.Columns>
 
-        </DataGrid>
-        
+            </DataGrid>
+
         </StackPanel>
-        
-        
-        <StackPanel Grid.Row="1" Grid.Column="0" 
-                    Orientation="Horizontal" 
-                    x:Name="stackPanelButtons">
-            <Button Content="Hinzufügen" 
-                    Command="{Binding Path=AddTeamCommand}" 
-                    Margin="10" Padding="10"/>
-            <Button Content="Entfernen" 
-                    Command="{Binding Path=RemoveTeamCommand}" 
-                    Margin="10" Padding="10"/>
-            <Button Content="Quittungen"
-                    Command="{Binding Path=PrintQuittungenCommand}"
-                    HorizontalAlignment="Left"
-                    Margin="10" Padding="10" />
-        </StackPanel>
+
+
+
 
         <StackPanel Grid.Column="1" 
-                      Margin="20,0" Visibility="{Binding Path=SelectedTeam, Converter={StaticResource ValueNotNullToVisibility}}">
-                <Label Content="Mannschaftsdaten" FontWeight="Bold" FontSize="18"/>
+                    Width="450"
+                    Margin="20,0" 
+                    Visibility="{Binding Path=SelectedTeam, Converter={StaticResource ValueNotNullToVisibility}}">
 
-                <Grid Margin="0,10,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+            <Label Content="Mannschaftsdaten" FontWeight="Bold" FontSize="18"/>
 
-                    <Label Grid.Row="0" Grid.Column="0" Margin="0,10,0,0"
-                           Content="Name:"  HorizontalContentAlignment="Right"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,10,0,0"
-                             Text="{Binding Path=SelectedTeam.TeamName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             VerticalContentAlignment="Center" 
-                             HorizontalAlignment="Stretch"
-                             VerticalAlignment="Stretch"/>
+            <Grid Margin="0,10,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="1" Grid.Column="0" Margin="0,10,0,0"
+                <Label Grid.Row="0" Grid.Column="0" Margin="0,10,0,0"
+                       Content="Name:"  HorizontalContentAlignment="Right"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="0,10,0,0"
+                         Text="{Binding Path=SelectedTeam.TeamName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalContentAlignment="Center" 
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Margin="0,10,0,0"
                            Content="Kreis / Nation:" HorizontalContentAlignment="Right"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,10,0,0"
+                <TextBox Grid.Row="1" Grid.Column="1" Margin="0,10,0,0"
                              Text="{Binding Path=SelectedTeam.Nation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              HorizontalContentAlignment="Left" 
                              VerticalContentAlignment="Center"
                              MaxLength="20"/>
-                   
-                    
-                </Grid>
-                
-                <Label Content="Spieler" FontWeight="Bold" Margin="0,10,0,0"/>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="Hinzufügen" 
+
+
+            </Grid>
+
+            <Label Content="Spieler" FontWeight="Bold" Margin="0,10,0,0"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Hinzufügen" 
                             Command="{Binding Path=AddPlayerCommand}"
                             Margin="0,10" Padding="10" HorizontalAlignment="Left"/>
-                    <Button Content="Entfernen" 
+                <Button Content="Entfernen" 
                             Command="{Binding Path=RemovePlayerCommand}"
                             Margin="10,10" Padding="10" HorizontalAlignment="Left"/>
-                </StackPanel>
-                <DataGrid ItemsSource="{Binding Path=Players}"
-                          SelectedItem="{Binding Path=SelectedPlayer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          AutoGenerateColumns="False"
-                          SelectionMode="Single"
-                          RowHeaderWidth="0"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="False"
-                          Height="auto" >
-                    <DataGrid.Resources>
-                        <Style TargetType="DataGridCell">
-                            <Style.Triggers>
-                                <Trigger Property="IsFocused" Value="True">
-                                    <Setter Property="Background" Value="Green"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Nachname" 
-                                            Binding="{Binding LastName}" 
-                                            MinWidth="100"
-                                            Width="auto">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Margin" Value="5"/>
-                                    
-                                </Style>
-                                
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Vorname" 
-                                            Binding="{Binding FirstName}"
-                                            MinWidth="100"
-                                            Width="auto">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Margin" Value="5"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Passnummer" 
-                                            Binding="{Binding LicenseNumber}"
-                                            MinWidth="50"
-                                            Width="auto">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Margin" Value="5"/>
-                                </Style>
-
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-
-                </DataGrid>
-                
             </StackPanel>
+            <DataGrid ItemsSource="{Binding Path=Players}"
+                      SelectedItem="{Binding Path=SelectedPlayer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      AutoGenerateColumns="False"
+                      SelectionMode="Single"
+                      RowHeaderWidth="0"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeColumns="False"
+                      CanUserReorderColumns="False"
+                      Height="auto" >
+
+                <DataGrid.Resources>
+
+                    <Style TargetType="DataGridCell">
+                        <Style.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Background" Value="Green"/>
+                            </Trigger>
+                        </Style.Triggers>
+
+                    </Style>
+
+                    <Style x:Key="colHeaderCenter" TargetType="DataGridColumnHeader">
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    </Style>
+
+                    <Style x:Key="verticalCenter" TargetType="{x:Type TextBlock}">
+                        <Setter Property="Margin" Value="5"/>
+                        <Setter Property="TextAlignment" Value="Center"/>
+                    </Style>
+                    <Style x:Key="editTextBox" TargetType="{x:Type TextBox}">
+                        <Setter Property="TextAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Background" Value="Green"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+
+                </DataGrid.Resources>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Nachname" 
+                                        Binding="{Binding LastName}" 
+                                        MinWidth="100"
+                                        HeaderStyle="{StaticResource colHeaderCenter}" 
+                                        ElementStyle="{StaticResource verticalCenter}"
+                                        EditingElementStyle="{StaticResource editTextBox}" 
+                                        Width="2*"/>
+
+                    <DataGridTextColumn Header="Vorname" 
+                                        Binding="{Binding FirstName}"
+                                        MinWidth="100"
+                                        HeaderStyle="{StaticResource colHeaderCenter}" 
+                                        ElementStyle="{StaticResource verticalCenter}"
+                                        EditingElementStyle="{StaticResource editTextBox}" 
+                                        Width="2*"/>
+
+
+                    <DataGridTextColumn Header="Pass#" 
+                                        Binding="{Binding LicenseNumber}"
+                                        MinWidth="50"
+                                        HeaderStyle="{StaticResource colHeaderCenter}" 
+                                        ElementStyle="{StaticResource verticalCenter}"
+                                        EditingElementStyle="{StaticResource editTextBox}" 
+                                        Width="auto"/>
+
+
+                </DataGrid.Columns>
+
+            </DataGrid>
+
+        </StackPanel>
 
     </Grid>
 </UserControl>
+

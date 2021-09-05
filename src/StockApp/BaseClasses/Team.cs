@@ -342,12 +342,20 @@ namespace StockApp.BaseClasses
             RaisePropertyChanged(nameof(Games));
         }
 
+        /// <summary>
+        /// Ein Spiel anhängen
+        /// </summary>
+        /// <param name="game"></param>
         public void AddGame(Game game)
         {
             this.games.Add(game);
             RaisePropertyChanged(nameof(Games));
         }
 
+        /// <summary>
+        /// Alle Spiele gruppiert nach Runde
+        /// </summary>
+        /// <returns></returns>
         public IOrderedEnumerable<IGrouping<int, Game>> GetGamesGroupedByRound()
         {
             return from game in Games.OrderBy(r => r.RoundOfGame)
@@ -357,18 +365,29 @@ namespace StockApp.BaseClasses
                    select grGames;
         }
 
+        /// <summary>
+        /// Einen Spieler der Mannschaft entfernen
+        /// </summary>
+        /// <param name="selectedPlayer"></param>
         internal void RemovePlayer(Player selectedPlayer)
         {
             this.Players.Remove(selectedPlayer);
             RaisePropertyChanged(nameof(Players));
         }
 
+        /// <summary>
+        /// Einen Spieler der Mannschaft anfügen
+        /// </summary>
         internal void AddPlayer()
         {
             this.Players.Add(new Player());
             RaisePropertyChanged(nameof(Players));
         }
 
+        /// <summary>
+        /// Startnummer und Mannschaftsname
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return $"{StartNumber}. {TeamName}";

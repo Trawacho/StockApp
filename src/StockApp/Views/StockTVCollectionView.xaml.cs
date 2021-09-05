@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace StockApp.Views
 {
     /// <summary>
-    /// Interaction logic for TournamentView.xaml
+    /// Interaction logic for StockTVCollectionView.xaml
     /// </summary>
-    public partial class TournamentView : UserControl
+    public partial class StockTVCollectionView : UserControl
     {
-        public TournamentView()
+        public StockTVCollectionView()
         {
             InitializeComponent();
         }

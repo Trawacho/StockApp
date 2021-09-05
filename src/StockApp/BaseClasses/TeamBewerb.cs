@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 
 namespace StockApp.BaseClasses
 {
-    public class Tournament : TBaseClass, ITournament
+    public class TeamBewerb : TBaseBewerb, ITeamBewerb
     {
         #region Fields
 
         private readonly List<Team> _teams;
-        private bool twoPauseGames;
-        private int numberOfGameRounds;
-        private int spielGruppe;
+        private bool _twoPauseGames;
+        private int _numberOfGameRounds;
 
         #endregion
 
@@ -26,40 +25,9 @@ namespace StockApp.BaseClasses
         public ReadOnlyCollection<Team> Teams { get; }
 
         /// <summary>
-        /// Veranstaltungsort
-        /// </summary>
-        public string Venue { get; set; }
-
-        /// <summary>
-        /// Organisator / Veranstalter
-        /// </summary>
-        public string Organizer { get; set; }
-
-        /// <summary>
-        /// Datum / Zeit des Turniers
-        /// </summary>
-        public DateTime DateOfTournament { get; set; }
-
-        /// <summary>
-        /// Durchführer
-        /// </summary>
-        public string Operator { get; set; }
-
-        /// <summary>
-        /// Turniername
-        /// </summary>
-        public string TournamentName { get; set; }
-
-        /// <summary>
         /// Anzahl der Stockbahnen / Spielfächen
         /// </summary>
-        public int NumberOfCourts
-        {
-            get
-            {
-                return Teams.Count(t => !t.IsVirtual) / 2; ;
-            }
-        }
+        public int NumberOfCourts => Teams.Count(t => !t.IsVirtual) / 2;
 
         /// <summary>
         /// Number of rounds to play (default 1) 
@@ -68,14 +36,14 @@ namespace StockApp.BaseClasses
         {
             get
             {
-                return numberOfGameRounds;
+                return _numberOfGameRounds;
             }
             set
             {
-                if (numberOfGameRounds == value) return;
+                if (_numberOfGameRounds == value) return;
                 if (value < 1 || value > 7) return;
 
-                numberOfGameRounds = value;
+                _numberOfGameRounds = value;
                 RaisePropertyChanged();
             }
         }
@@ -93,13 +61,12 @@ namespace StockApp.BaseClasses
             get
             {
                 return Teams.Count(t => !t.IsVirtual) % 2 == 0
-                                        ? twoPauseGames
-                                        : false;
+                            && _twoPauseGames;
             }
             set
             {
-                if (value == twoPauseGames) return;
-                twoPauseGames = value;
+                if (value == _twoPauseGames) return;
+                _twoPauseGames = value;
                 RaisePropertyChanged();
             }
         }
@@ -115,14 +82,12 @@ namespace StockApp.BaseClasses
         public bool StartingTeamChange { get; set; }
 
         /// <summary>
-        /// Startgebühr pro Mannschaft
-        /// </summary>
-        public EntryFee EntryFee { get; set; }
-
-        /// <summary>
         /// Bei wieviel Mannschaften werden die Spielernamen auf der Ergebnisliste mit angedruckt
         /// </summary>
         public int NumberOfTeamsWithNamedPlayerOnResult { get; set; }
+
+
+        private int spielGruppe;
 
         /// <summary>
         /// Nummer der Gruppe, wenn mehrere Gruppen gleichzeitig auf der Spielfläche sind
@@ -140,62 +105,39 @@ namespace StockApp.BaseClasses
         }
         public string SpielGruppeString()
         {
-            switch (SpielGruppe)
+            return SpielGruppe switch
             {
-                case 1:
-                    return "A";
-                case 2:
-                    return "B";
-                case 3:
-                    return "C";
-                case 4:
-                    return "D";
-                case 5:
-                    return "E";
-                case 6:
-                    return "F";
-                case 7:
-                    return "G";
-                case 8:
-                    return "H";
-                case 9:
-                    return "I";
-                case 10:
-                    return "J";
-                case 0:
-                default:
-                    return string.Empty;
-            }
+                1 => "A",
+                2 => "B",
+                3 => "C",
+                4 => "D",
+                5 => "E",
+                6 => "F",
+                7 => "G",
+                8 => "H",
+                9 => "I",
+                10 => "J",
+                _ => string.Empty,
+            };
         }
-
-        public Referee Referee { get; set; }
-        public CompetitionManager CompetitionManager { get; set; }
-        public ComputingOfficer ComputingOfficer { get; set; }
 
         #endregion
 
         #region Constructor
 
-        public Tournament()
+        public TeamBewerb()
         {
             this.IsDirectionOfCourtsFromRightToLeft = true;
             this.NumberOfGameRounds = 1;
             this.TwoPauseGames = false;
             this.Is8TurnsGame = false;
-            this.EntryFee = new EntryFee();
-            StartingTeamChange = false;
-            DateOfTournament = DateTime.Now;
+
+            this.StartingTeamChange = false;
 
             this._teams = new List<Team>();
             this.Teams = _teams.AsReadOnly();
-
             this.NumberOfTeamsWithNamedPlayerOnResult = 3;
-            this.SpielGruppe = 0;
-            this.Referee = new Referee();
-            this.CompetitionManager = new CompetitionManager();
-            this.ComputingOfficer = new ComputingOfficer();
         }
-
 
         #endregion
 
@@ -210,11 +152,20 @@ namespace StockApp.BaseClasses
             return Teams.SelectMany(g => g.Games).Distinct();
         }
 
+        /// <summary>
+        /// Anzahl aller Spiele aller Mannschaften
+        /// </summary>
+        /// <returns></returns>
         internal int CountOfGames()
         {
             return GetAllGames().ToList().Count();
         }
 
+        /// <summary>
+        /// Alle Spiele auf der Bahn x
+        /// </summary>
+        /// <param name="courtNumber"></param>
+        /// <returns></returns>
         public IEnumerable<Game> GetGamesOfCourt(int courtNumber)
         {
             return Teams.SelectMany(g => g.Games)
@@ -224,6 +175,11 @@ namespace StockApp.BaseClasses
                 .ThenBy(s => s.GameNumber);
         }
 
+        /// <summary>
+        /// Platzierungs Liste der Mannschaften 
+        /// </summary>
+        /// <param name="live"></param>
+        /// <returns></returns>
         public IEnumerable<Team> GetTeamsRanked(bool live = false)
         {
             return live
@@ -355,6 +311,9 @@ namespace StockApp.BaseClasses
             RemoveAllVirtualTeams();
         }
 
+        /// <summary>
+        /// Funktion zur Erzeugung des Spielplans
+        /// </summary>
         internal void CreateGames()
         {
             /*
@@ -525,7 +484,10 @@ namespace StockApp.BaseClasses
 
         }
 
-        internal void SetBroadcastData(NetworkTelegram telegram)
+
+        private NetworkTelegram lastTelegram;
+
+        public override void SetBroadcastData(NetworkTelegram telegram)
         {
             /* 
              * 03 00 15 09 21 07 09 15
@@ -537,31 +499,26 @@ namespace StockApp.BaseClasses
              * dann der Wert der rechten Mannschaft
              * 
              */
+            if (telegram.StockTVModus == 100) return;
+            if (telegram.Equals(lastTelegram)) return;
+            lastTelegram = telegram.Copy();
 
-            if (telegram == null)
-                return;
 
             try
             {
-                byte bahnNumber = telegram.BahnNummer;
-                byte groupNumber = telegram.SpielGruppe;
-                byte[] values = telegram.Values;
-
-                IEnumerable<Game> courtGames = GetGamesOfCourt(bahnNumber);   //Alle Spiele im Turnier auf dieser Bahn
-
-                
 
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"Bahn:{bahnNumber} Grp:{groupNumber} -- {string.Join("-", values)}");
+                System.Diagnostics.Debug.WriteLine($"Bahnnummer:{telegram.BahnNummer} -- {string.Join("-", telegram.Values)}");
 #endif
+                byte bahnNumber = telegram.BahnNummer;          // Im ersten Byte immer die Bahnnummer
+                byte groupNumber = telegram.SpielGruppe;        // Default 0
+                var courtGames = GetGamesOfCourt(bahnNumber);   //Alle Spiele im Turnier auf dieser Bahn
 
 
                 int spielZähler = 1;
 
-                if (groupNumber != this.SpielGruppe) { return; }    //Bei Daten der falschen Spielgruppe Funktion beenden
-
                 //Jedes verfügbare Spiel im Datagramm durchgehen, i+2, da jedes Spiel 2 Bytes braucht. Im ersten Byte der Wert für Link, das zweite Byte für den Wert rechts
-                for (int i = 0; i < values.Length; i += 2)
+                for (int i = 0; i < telegram.Values.Length; i += 2)
                 {
                     var preGame = courtGames.FirstOrDefault(g => g.GameNumberOverAll == spielZähler - 1);
                     if (preGame != null)
@@ -582,14 +539,14 @@ namespace StockApp.BaseClasses
                         {
                             // TeamA befindet sich bei diesem Spiel auf dieser Bahn rechts, 
                             // das nächste Spiel ist auf einer Bahn mit höherer oder gleicher Bahnnummer (1-> 2-> 3-> 4->...)
-                            game.NetworkTurn.PointsTeamA = values[i + 1];
-                            game.NetworkTurn.PointsTeamB = values[i];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i + 1];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i];
                         }
                         else
                         {
                             // TeamA befindet sich bei diesem Spiel auf der Bahn links, das nächste Spiel ist auf einer Bahn mit niedrigerer Bahnnummer (5->4->3->2->1)
-                            game.NetworkTurn.PointsTeamA = values[i];
-                            game.NetworkTurn.PointsTeamB = values[i + 1];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i + 1];
                         }
                     }
                     else
@@ -597,14 +554,14 @@ namespace StockApp.BaseClasses
                         if (game.TeamA.SpieleAufStartSeite.Contains(game.GameNumberOverAll))
                         {
                             // TeamA befindet sich in diesem Spiel auf dieser Bahn links, das nächste Spiel ist auf einer Bahn mit einer höheren Bahnnummer
-                            game.NetworkTurn.PointsTeamA = values[i];
-                            game.NetworkTurn.PointsTeamB = values[i + 1];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i + 1];
                         }
                         else
                         {
                             // TeamA befindet sich in diesem Spiel auf dieser Bahn rechts, das nächste Spiel ist auf einer Bahn mit einer niedrigeren Bahnnummer
-                            game.NetworkTurn.PointsTeamA = values[i + 1];
-                            game.NetworkTurn.PointsTeamB = values[i];
+                            game.NetworkTurn.PointsTeamA = telegram.Values[i + 1];
+                            game.NetworkTurn.PointsTeamB = telegram.Values[i];
                         }
                     }
 
@@ -613,7 +570,7 @@ namespace StockApp.BaseClasses
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Modul: {nameof(SetBroadcastData)} -> {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
             finally
             {

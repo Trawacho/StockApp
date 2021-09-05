@@ -1,7 +1,10 @@
 ﻿using StockApp.BaseClasses;
+using StockApp.BaseClasses.Zielschiessen;
 using StockApp.Commands;
 using StockApp.Dialogs;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -15,11 +18,13 @@ namespace StockApp.ViewModels
 
         private readonly IDialogService dialogService;
 
-        private readonly NetworkService _NetworkService;
-        private Tournament _Tournament;
         private BaseViewModel _viewModel;
 
+        private Turnier _turnier;
+
         private string tournamentFileName = string.Empty;
+
+        private StockTVs _stockTVs;
 
         #endregion
 
@@ -30,16 +35,9 @@ namespace StockApp.ViewModels
         /// </summary>
         public BaseViewModel ViewModel
         {
-            get
-            {
-                return _viewModel;
-            }
-            set
-            {
-                if (_viewModel == value) return;
-                _viewModel = value;
-                RaisePropertyChanged();
-            }
+            get => _viewModel;
+            set => SetProperty(ref _viewModel, value);
+
         }
 
         /// <summary>
@@ -54,20 +52,44 @@ namespace StockApp.ViewModels
         {
             get
             {
-                if (_NetworkService == null)
-                    return "Start Listener";
-
-                return _NetworkService.IsRunning()
+                return NetworkService.Instance.IsRunning()
                             ? "Stop Listener"
                             : "Start Listener";
             }
         }
 
+        /// <summary>
+        /// Zeigt die Versionsnummer vom Assembly
+        /// </summary>
         public string VersionNumber
         {
             get
             {
-                return $"Version: {Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
+                return $"Version: {Assembly.GetExecutingAssembly().GetName().Version}";
+            }
+        }
+
+        public bool IsTeamBewerb
+        {
+            get
+            {
+                return _turnier.Wettbewerb is TeamBewerb;
+            }
+        }
+
+        public bool IsZielBewerb
+        {
+            get
+            {
+                return _turnier.Wettbewerb is Zielbewerb;
+            }
+        }
+
+        public string StockTVCount
+        {
+            get
+            {
+                return $"StockTV: {_stockTVs?.Count ?? 0}x";
             }
         }
 
@@ -80,40 +102,52 @@ namespace StockApp.ViewModels
         /// </summary>
         public MainViewModel()
         {
-            SetNewTournament(new Tournament());
-            this._NetworkService = new NetworkService();
-            this._NetworkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
-            this._NetworkService.DataReceived += NetworkService_DataReceived;
+            SetNewTurnier(new Turnier());
+
+            NetworkService.Instance.StartStopStateChanged += NetworkService_StartStopStateChanged;
+            NetworkService.Instance.DataReceived += NetworkService_DataReceived;
+
+            _stockTVs = new StockTVs();
+            _stockTVs.StockTVCollectionAdded += StockTVs_StockTVCollectionAdded;
+            _stockTVs.StockTVCollectionRemoved += StockTVs_StockTVCollectionRemoved;
+            _stockTVs.StartDiscovery();
         }
 
-        private void SetNewTournament(Tournament t)
+        private void SetNewTurnier(Turnier t)
         {
-            if (this._Tournament != null)
-                this._Tournament.PropertyChanged -= Tournament_PropertyChanged;
+            if (_turnier != null)
+            {
+                _turnier.PropertyChanged -= Turnier_PropertyChanged;
+                _turnier.SpielgruppeChanged -= Turnier_SpielgruppeChanged;
+            }
 
-            this._Tournament = t;
-            ViewModel = new TournamentViewModel(_Tournament);
+            _turnier = t;
+            t.SetBewerb(Wettbewerbsart.Team);
+            
+            RaisePropertyChanged(nameof(IsZielBewerb));
+            RaisePropertyChanged(nameof(IsTeamBewerb));
+            ViewModel = new TurnierViewModel(_turnier);
             RaisePropertyChanged(nameof(WindowTitle));
-            this._Tournament.PropertyChanged += Tournament_PropertyChanged;
+            _turnier.PropertyChanged += Turnier_PropertyChanged;
+            _turnier.SpielgruppeChanged += Turnier_SpielgruppeChanged;
         }
 
-
-
-        private void Tournament_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Turnier_SpielgruppeChanged(object sender, EventArgs e)
         {
-            if (e.PropertyName == nameof(Tournament.SpielGruppe))
-                RaisePropertyChanged(nameof(WindowTitle));
+            RaisePropertyChanged(nameof(WindowTitle));
         }
 
         private void NetworkService_DataReceived(object sender, NetworkServiceDataReceivedEventArgs e)
         {
-            this._Tournament?.SetBroadcastData(e.NetworkTelegram);
+            this._turnier.Wettbewerb.SetBroadcastData(e.NetworkTelegram);
         }
 
-        private void NetworkService_StartStopStateChanged(object sender, EventArgs e)
+        private void NetworkService_StartStopStateChanged(object sender, NetworkServiceStateEventArgs e)
         {
             RaisePropertyChanged(nameof(UdpButtonContent));
         }
+
+
 
         /// <summary>
         /// Default-Constructor
@@ -126,19 +160,41 @@ namespace StockApp.ViewModels
 
         #endregion
 
+        private void StockTVs_StockTVCollectionRemoved(object sender, StockTVCollectionChangedEventArgs e)
+        {
+            RaisePropertyChanged(nameof(StockTVCount));
+        }
+
+        private void StockTVs_StockTVCollectionAdded(object sender, StockTVCollectionChangedEventArgs e)
+        {
+            RaisePropertyChanged(nameof(StockTVCount));
+        }
+
+
+        private void Turnier_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Turnier.Wettbewerb))
+            {
+                RaisePropertyChanged(nameof(this.IsTeamBewerb));
+                RaisePropertyChanged(nameof(this.IsZielBewerb));
+            }
+        }
+
+
+
         public string WindowTitle
         {
             get
             {
-                if (this._Tournament.SpielGruppe == 0)
+                if ((_turnier.Wettbewerb is TeamBewerb t && t.SpielGruppe == 0) ||
+                    _turnier.Wettbewerb is Zielbewerb)
                     return "StockApp";
                 else
                 {
-                    return $"StockApp --> Gruppe:{_Tournament.SpielGruppeString()}";
+                    return $"StockApp --> Gruppe:{(_turnier.Wettbewerb as TeamBewerb).SpielGruppeString()}";
                 }
             }
         }
-      
 
         #region Commands
 
@@ -151,24 +207,38 @@ namespace StockApp.ViewModels
                     (p) =>
                     {
                         dialogService.SetOwner(App.Current.MainWindow);
-                        dialogService.Show(
-                              new LiveResultViewModel(_Tournament, _NetworkService));
+                        if (this.IsTeamBewerb)
+                            dialogService.Show(
+                                  new LiveResultViewModel(_turnier)
+                                  );
+                        else if (this.IsZielBewerb)
+                            dialogService.Show(
+                                new LiveZielResultViewModel(_turnier)
+                                );
                     },
-                    (p) => true
+                    (p) =>
+                    {
+                        return true;
+                    }
                     );
             }
         }
 
-        private ICommand _StartStopUdpReceiverCommand;
+        private ICommand _startStopUdpReceiverCommand;
         public ICommand StartStopUdpReceiverCommand
         {
             get
             {
-                return _StartStopUdpReceiverCommand ??=
+                return _startStopUdpReceiverCommand ??=
                     new RelayCommand(
                             (p) =>
                             {
-                                _NetworkService.SwitchStartStopState();
+
+                                if (NetworkService.Instance.IsRunning())
+                                    NetworkService.Instance.Stop();
+                                else
+                                    NetworkService.Instance.Start();
+
                                 RaisePropertyChanged(nameof(UdpButtonContent));
                             },
                             (o) => { return true; }
@@ -184,7 +254,7 @@ namespace StockApp.ViewModels
                 return _showTournamentViewCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        ViewModel = new TournamentViewModel(_Tournament);
+                        ViewModel = new TurnierViewModel(_turnier);
                     },
                     (p) => true
                     );
@@ -199,9 +269,12 @@ namespace StockApp.ViewModels
                 return _showTeamsViewCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        this.ViewModel = new TeamsViewModel(_Tournament);
+                        this.ViewModel = new TeamsViewModel(_turnier);
                     },
-                    (p) => true
+                    (p) =>
+                    {
+                        return IsTeamBewerb;
+                    }
                     ); ;
             }
         }
@@ -214,11 +287,11 @@ namespace StockApp.ViewModels
                 return _showGamesViewCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        this.ViewModel = new GamesViewModel(_Tournament);
+                        this.ViewModel = new GamesViewModel(_turnier.Wettbewerb as TeamBewerb, _stockTVs);
                     },
                     (p) =>
                     {
-                        return _Tournament.Teams.Count > 0;
+                        return (_turnier.Wettbewerb as TeamBewerb)?.Teams.Count > 0;
                     });
             }
         }
@@ -231,11 +304,11 @@ namespace StockApp.ViewModels
                 return _showResultsViewCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        this.ViewModel = new ResultsViewModel(_Tournament);
+                        this.ViewModel = new ResultsViewModel(_turnier);
                     },
                     (p) =>
                     {
-                        return _Tournament.CountOfGames() > 0;
+                        return (_turnier.Wettbewerb as TeamBewerb)?.CountOfGames() > 0;
                     });
             }
         }
@@ -261,17 +334,17 @@ namespace StockApp.ViewModels
                 return _newTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        SetNewTournament(new Tournament());
+                        SetNewTurnier(new Turnier());
                     });
             }
         }
 
-        private ICommand _SaveTournamentCommand;
+        private ICommand _saveTournamentCommand;
         public ICommand SaveTournamentCommand
         {
             get
             {
-                return _SaveTournamentCommand ??= new RelayCommand(
+                return _saveTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
                         Save(tournamentFileName);
@@ -279,12 +352,12 @@ namespace StockApp.ViewModels
             }
         }
 
-        private ICommand _SaveAsTournamentCommand;
+        private ICommand _saveAsTournamentCommand;
         public ICommand SaveAsTournamentCommand
         {
             get
             {
-                return _SaveAsTournamentCommand ??= new RelayCommand(
+                return _saveAsTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
                         Save(null);
@@ -292,26 +365,26 @@ namespace StockApp.ViewModels
             }
         }
 
-        private ICommand _OpenTournamentCommand;
+        private ICommand _openTournamentCommand;
         public ICommand OpenTournamentCommand
         {
             get
             {
-                return _OpenTournamentCommand ??= new RelayCommand(
+                return _openTournamentCommand ??= new RelayCommand(
                     (p) =>
                     {
                         try
                         {
                             var ofd = new OpenFileDialog
                             {
-                                Filter = "StockApp Files (*.skmr)|*.skmr",
+                                Filter = "StockMaster Files (*.skmr)|*.skmr",
                                 DefaultExt = "skmr"
                             };
 
                             if (ofd.ShowDialog() == DialogResult.OK)
                             {
                                 var filePath = ofd.FileName;
-                                SetNewTournament(TournamentExtension.Load(filePath));
+                                SetNewTurnier(Turnier.Load(filePath));
                                 this.tournamentFileName = filePath;
                             }
                         }
@@ -324,6 +397,42 @@ namespace StockApp.ViewModels
             }
         }
 
+        private ICommand _showZielSpielerViewCommand;
+        public ICommand ShowZielSpielerViewCommand
+        {
+            get
+            {
+                return
+                   _showZielSpielerViewCommand ??= new RelayCommand(
+                       (p) =>
+                       {
+                           this.ViewModel = new ZielSpielerViewModel(_turnier);
+                       },
+                       (p) =>
+                       {
+                           return (_turnier.Wettbewerb is Zielbewerb);
+                       });
+            }
+        }
+
+
+        private ICommand _showStockTVCollectionCommand;
+        public ICommand ShowStockTVCollectionCommand
+        {
+            get
+            {
+                return
+                    _showStockTVCollectionCommand ??= new RelayCommand(
+                        (p) =>
+                        {
+                            this.ViewModel = new StockTVCollectionViewModel(ref _stockTVs);
+                        },
+                        (p) =>
+                        {
+                            return true;
+                        });
+            }
+        }
         #endregion
 
         private void Save(string fileName)
@@ -346,7 +455,7 @@ namespace StockApp.ViewModels
 
             try
             {
-                TournamentExtension.Save(_Tournament, fileName);
+                Turnier.Save(_turnier, fileName);
                 this.tournamentFileName = fileName;
             }
             catch (Exception ex)
@@ -355,10 +464,14 @@ namespace StockApp.ViewModels
             }
         }
 
-        internal void ExitApplication()
+        internal void StopNetMq()
         {
-            _NetworkService.Stop();
-           
+            _stockTVs.StopAllServices();
         }
+
+
+
+
     }
 }
+

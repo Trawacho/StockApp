@@ -63,6 +63,7 @@
                       ItemsSource="{Binding Path=Teams, Mode=OneWay}"
                       SelectedItem="{Binding Path=SelectedTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
+
             <ListView Visibility="{Binding ElementName=radioButtonGame, 
                                            Path=IsChecked, 
                                            Converter={StaticResource BoolToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged}"
@@ -86,8 +87,6 @@
                                          Path=IsChecked, 
                                          Converter={StaticResource BoolToVisibilityConverter}}">
 
-
-
                 <Label Content="{Binding Path=SelectedTeam.TeamName}" Padding="10"/>
 
                 <DataGrid ItemsSource="{Binding Path=PointsOfSelectedTeam, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -104,8 +103,30 @@
                           CanUserDeleteRows="False"
                           CanUserReorderColumns="False">
 
-                    <DataGrid.CellStyle>
+                    <DataGrid.Resources>
+
                         <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="Background" Value="Green"/>
+                                </Trigger>
+                            </Style.Triggers>
+
+                        </Style>
+
+                        <Style x:Key="colHeaderCenter" TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+
+                        <Style x:Key="verticalCenter" TargetType="{x:Type TextBlock}">
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="TextAlignment" Value="Center"/>
+                        </Style>
+
+                        <Style x:Key="editTextBox" TargetType="{x:Type TextBox}">
+                            <Setter Property="TextAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
                             <Style.Triggers>
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter Property="Background" Value="Green"/>
@@ -113,74 +134,7 @@
                             </Style.Triggers>
                         </Style>
 
-                    </DataGrid.CellStyle>
-                    <DataGrid.Columns>
-
-                        <DataGridTextColumn Header="Spiel" Binding="{Binding Path=GameNumber, Mode=OneWay}"
-                                        Width="auto"
-                                        IsReadOnly="True">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-
-                        </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Team" Binding="{Binding Path=StockPunkte, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Width="75"
-                                        TextBlock.TextAlignment="Center">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Gegner"  Binding="{Binding Path=StockPunkteGegner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Width="75">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="--->"  Binding="{Binding Path=Gegner, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                        IsReadOnly="True"
-                                        Width="auto">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Left" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Left" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                    </DataGrid.Columns>
+                    </DataGrid.Resources>
 
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
@@ -192,20 +146,58 @@
                         </Style>
                     </DataGrid.RowStyle>
 
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="Spiel" 
+                                            Binding="{Binding Path=GameNumber, Mode=OneWay}"
+                                            Width="auto"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            IsReadOnly="True"/>
+
+                        <DataGridTextColumn Header="Team" 
+                                            Binding="{Binding Path=StockPunkte, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="75"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"/>
+
+
+
+                        <DataGridTextColumn Header="Gegner"  
+                                            Binding="{Binding Path=StockPunkteGegner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            Width="75"/>
+
+                        <DataGridTextColumn Header="--->"  
+                                            Binding="{Binding Path=Gegner, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                            IsReadOnly="True"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            Width="auto"/>
+
+                    </DataGrid.Columns>
+
+
+
                 </DataGrid>
 
 
             </StackPanel>
 
             <StackPanel Visibility="{Binding ElementName=radioButtonGame, 
-                                          Path=IsChecked, 
-                                          Converter={StaticResource BoolToVisibilityConverter}}">
+                                             Path=IsChecked, 
+                                             Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <Label Content="{Binding Path=SelectedGame.GameName}"  Padding="10"/>
 
                 <DataGrid ItemsSource="{Binding Path=PointsPerGameList, 
-                                            Mode=OneWay, 
-                                            UpdateSourceTrigger=PropertyChanged}"
+                                                Mode=OneWay, 
+                                                UpdateSourceTrigger=PropertyChanged}"
                           x:Name="dataGridGameResults"
                           Width="auto"
                           MinHeight="100"
@@ -219,8 +211,29 @@
                           CanUserDeleteRows="False"
                           CanUserReorderColumns="False">
 
-                    <DataGrid.CellStyle>
+                    <DataGrid.Resources>
+
                         <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="Background" Value="Green"/>
+                                </Trigger>
+                            </Style.Triggers>
+
+                        </Style>
+
+                        <Style x:Key="colHeaderCenter" TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+
+                        <Style x:Key="verticalCenter" TargetType="{x:Type TextBlock}">
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="TextAlignment" Value="Center"/>
+                        </Style>
+                        <Style x:Key="editTextBox" TargetType="{x:Type TextBox}">
+                            <Setter Property="TextAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
                             <Style.Triggers>
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter Property="Background" Value="Green"/>
@@ -228,92 +241,49 @@
                             </Style.Triggers>
                         </Style>
 
-                    </DataGrid.CellStyle>
+                    </DataGrid.Resources>
 
                     <DataGrid.Columns>
 
-                        <DataGridTextColumn Header="Bahn"  Binding="{Binding Path=Bahn, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                        IsReadOnly="True"
-                                        Width="auto">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Bahn"  
+                                            Binding="{Binding Path=Bahn, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                            IsReadOnly="True"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            Width="auto"/>
 
                         <DataGridTextColumn Header="Team"  
-                                        Binding="{Binding Path=TeamNameA, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Width="auto"
-                                        IsReadOnly="True">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="5"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding Path=TeamNameA, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="auto"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            IsReadOnly="True"/>
 
                         <DataGridTextColumn Header=" Stock&#x0a;Punkte"  
-                                        Binding="{Binding Path=StockPunkteA, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Width="75"
-                                        IsReadOnly="False">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding Path=StockPunkteA, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="75"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            IsReadOnly="False"/>
 
-                        <DataGridTextColumn Header="Team"  Binding="{Binding Path=TeamNameB, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Width="auto"
-                                        IsReadOnly="True">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Team"  
+                                            Binding="{Binding Path=TeamNameB, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="auto"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            IsReadOnly="True"/>
 
                         <DataGridTextColumn Header=" Stock&#x0a;Punkte"  
-                                        Binding="{Binding Path=StockPunkteB, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Width="75"
-                                        IsReadOnly="False">
-                            <DataGridTextColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                </Style>
-                            </DataGridTextColumn.HeaderStyle>
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Margin" Value="3"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding Path=StockPunkteB, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="75"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            IsReadOnly="False"/>
 
                     </DataGrid.Columns>
 

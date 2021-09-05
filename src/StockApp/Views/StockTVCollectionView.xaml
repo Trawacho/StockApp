@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="StockApp.Views.StockTVCollectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewmodels="clr-namespace:StockApp.ViewModels"
+             xmlns:usercontrols = "clr-namespace:StockApp.UserControls.StockTV"
+             xmlns:local="clr-namespace:StockApp.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1024"
+             d:DataContext="{d:DesignInstance 
+                            Type=viewmodels:StockTVCollectionDesignViewModel, 
+                            IsDesignTimeCreatable=True}">
+
+    <d:DesignerProperties.DesignStyle>
+        <Style TargetType="UserControl">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </d:DesignerProperties.DesignStyle>
+
+
+    <Grid Margin="10" >
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Einstellungen StockTV" Margin="0,0,0,20" FontWeight="Bold"/>
+
+        <CheckBox Content="Synchronisation der Einstellungen" Grid.Row="1"
+                  IsChecked="{Binding Path=Sync, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button Content="Neu Sortieren" Grid.Row="2" 
+                Command="{Binding Path=ReOrderStockTVCollectionCommand}"
+                Margin="10,5" Padding="5,2"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                HorizontalAlignment="Left"/>
+
+        <ListView ItemsSource="{Binding Path=StockTVCollection}" Grid.Row="3"   
+                  BorderThickness="0">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                    <!--<WrapPanel Width="{Binding (FrameworkElement.ActualWidth), RelativeSource={RelativeSource AncestorType=ScrollContentPresenter}}"
+                               ItemWidth="{Binding (ListView.View).ItemWidth, RelativeSource={RelativeSource AncestorType=ListView}}"
+                               ItemHeight="{Binding (ListView.View).ItemHeight, RelativeSource={RelativeSource AncestorType=ListView}}" 
+                               />-->
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <usercontrols:UserControlStockTV StockTV="{Binding}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+        </ListView>
+    </Grid>
+</UserControl>

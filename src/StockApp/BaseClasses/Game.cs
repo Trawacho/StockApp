@@ -227,6 +227,10 @@ namespace StockApp.BaseClasses
                     return false;
             }
         }
+
+        /// <summary>
+        /// normales Spiel, kein Aussetzer
+        /// </summary>
         public bool IsNotPauseGame
         {
             get

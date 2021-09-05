@@ -196,11 +196,17 @@
                       HorizontalAlignment="Left"
                       IsChecked="{Binding Path=IsStartOfGameChanged, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                       IsEnabled="{Binding Path=NumberOfGameRounds, Converter={StaticResource numberIsGreaterThenOneConverter}}"/>
-
-                <Button Content="Spielplan generieren"
+               
+                <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                    <Button Content="Spielplan generieren"
                         Command="{Binding Path=CreateGamesCommand}"
-                        Grid.Row="5" Grid.Column="0"
                         Margin="10" Padding="10"/>
+                    <Button Content="Namen -> StocktV"
+                        Command="{Binding Path=SendTeamsToStockTVCommand}"
+                        Margin="10" Padding="10"/>
+                    
+                </StackPanel>
+                
 
             </Grid>
 

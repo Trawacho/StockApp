@@ -6,8 +6,8 @@
     <!--StartupUri="MainWindow.xaml">-->
     <Application.Resources>
         
-        <DataTemplate x:Name="tournamentViewTemplate" DataType="{x:Type viewmodels:TournamentViewModel}">
-            <views:TournamentView />
+        <DataTemplate x:Name="tournamentViewTemplate" DataType="{x:Type viewmodels:TurnierViewModel}">
+            <views:TurnierView />
         </DataTemplate>
         
         <DataTemplate x:Name="teamsViewTemplate" DataType="{x:Type viewmodels:TeamsViewModel}">
@@ -20,6 +20,14 @@
 
         <DataTemplate x:Name="resultsViewTemplate" DataType="{x:Type viewmodels:ResultsViewModel}">
             <views:ResultsView />
+        </DataTemplate>
+
+        <DataTemplate x:Name="zielSpielerViewTemplate" DataType="{x:Type viewmodels:ZielSpielerViewModel}">
+            <views:ZielSpielerView />
+        </DataTemplate>
+
+        <DataTemplate x:Name="stockTVCollectionViewTemplate" DataType="{x:Type viewmodels:StockTVCollectionViewModel}">
+            <views:StockTVCollectionView />
         </DataTemplate>
 
     </Application.Resources>

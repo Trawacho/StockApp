@@ -18,6 +18,7 @@
 
     <Window.Resources>
         <converters:TupleValue_Team_Converter x:Key="TVC"/>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
 
  
@@ -55,6 +56,8 @@
 
         <StatusBar DockPanel.Dock="Bottom">
             <TextBlock Text="{Binding Path=VersionNumber}"/>
+            <Separator/>
+            <TextBlock Text="{Binding Path=StockTVCount}"/>
         </StatusBar>
 
         <StackPanel DockPanel.Dock="Left" Margin="5" Background="#FF0E3A59">
@@ -65,24 +68,43 @@
                     <Setter Property="Padding" Value="13"/>
                 </Style>
             </StackPanel.Resources>
+            
             <Button Content="Tunier Daten" 
                     Command="{Binding Path=ShowTournamentViewCommand}"
                     Margin="10,10,10,5"/>
+            
+            <Button Content="Spieler"
+                    Command="{Binding Path=ShowZielSpielerViewCommand}"
+                    Visibility="{Binding Path=IsZielBewerb, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Margin="10,5"/>
+            
             <Button Content="Mannschaften" 
                     Command="{Binding Path=ShowTeamsViewCommand}"
+                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
                     Margin="10,5"/>
+            
             <Button Content="Spiele" 
                     Command="{Binding Path=ShowGamesViewCommand}"
+                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
                     Margin="10,5"/>
+            
             <Button Content="Ergebnisse" 
                     Command="{Binding Path=ShowResultsViewCommand}"
+                    Visibility="{Binding Path=IsTeamBewerb, Converter={StaticResource BoolToVisibilityConverter }}"
                     Margin="10,5"/>
+            
             <Button Content="Live Ergebnisse"
                     Command="{Binding Path=ShowLiveResultCommand}"
                     Margin="10,5"/>
 
-        </StackPanel>
+          
+            
+            <Button Content="StockTV"
+                    Command="{Binding Path=ShowStockTVCollectionCommand}"
+                    Margin="10,5"/>
 
+        </StackPanel>
+        
         <ScrollViewer DockPanel.Dock="Left"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto">

@@ -12,10 +12,10 @@ namespace StockApp.Output.Receipts
     public class Receipt
     {
         FixedDocument document;
-        private readonly Tournament tournament;
-        public Receipt(Tournament tournament)
+        private readonly Turnier turnier;
+        public Receipt(Turnier turnier)
         {
-            this.tournament = tournament;
+            this.turnier = turnier;
         }
 
         public FixedDocument CreateReceipts(Size pageSize)
@@ -26,18 +26,18 @@ namespace StockApp.Output.Receipts
 
             var receipts = new List<StackPanel>();
 
-            foreach (var team in tournament.Teams.Where(t => !t.IsVirtual))
+            foreach (var team in (turnier.Wettbewerb as TeamBewerb).Teams.Where(t => !t.IsVirtual))
             {
                 var receiptStackPanel = new StackPanel();
                 receiptStackPanel.Children.Add(Tools.CutterLineTop());
 
                 var receipt = new ucReceipt();
-                receipt.labelAn.Content = tournament.Organizer;
+                receipt.labelAn.Content = turnier.OrgaDaten.Organizer;
                 receipt.labelVon.Content = team.TeamName;
-                receipt.labelEUR.Content = tournament.EntryFee.Value.ToString("C");
-                receipt.labelVerbal.Content = $"-- {tournament.EntryFee.Verbal} --";
-                receipt.labelZweck.Content = tournament.TournamentName;
-                receipt.labelOrtDatum.Content = tournament.Venue + ", " + tournament.DateOfTournament.ToString("dd.MM.yyyy");
+                receipt.labelEUR.Content = turnier.OrgaDaten.EntryFee.Value.ToString("C");
+                receipt.labelVerbal.Content = $"-- {turnier.OrgaDaten.EntryFee.Verbal} --";
+                receipt.labelZweck.Content = turnier.OrgaDaten.TournamentName;
+                receipt.labelOrtDatum.Content = turnier.OrgaDaten.Venue + ", " + turnier.OrgaDaten.DateOfTournament.ToString("dd.MM.yyyy");
                 receiptStackPanel.Children.Add(receipt);
 
                 receiptStackPanel.Children.Add(Tools.CutterLine());
@@ -77,7 +77,7 @@ namespace StockApp.Output.Receipts
 
             panel.HorizontalAlignment = HorizontalAlignment.Center;
             panel.VerticalAlignment = VerticalAlignment.Center;
-            
+
             FixedPage.SetTop(panel, PixelConverter.CmToPx(1));
             FixedPage.SetLeft(panel, PixelConverter.CmToPx(2.0));
             newPage.Children.Add(panel);
@@ -87,6 +87,6 @@ namespace StockApp.Output.Receipts
             document.Pages.Add(content);
         }
 
-        
+
     }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StockApp.BaseClasses
+﻿namespace StockApp.BaseClasses
 {
-   
+
 
     /// <summary>
     /// Eine Kehre im Spiel
@@ -64,6 +58,10 @@ namespace StockApp.BaseClasses
             PointsTeamA = 0;
             PointsTeamB = 0;
         }
+
+        #endregion
+
+        #region Function
 
         internal void Reset()
         {

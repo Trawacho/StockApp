@@ -1,4 +1,5 @@
 ﻿using StockApp.BaseClasses;
+using StockApp.BaseClasses.Zielschiessen;
 using StockApp.Commands;
 using StockApp.Dialogs;
 using StockApp.Interfaces;
@@ -9,19 +10,23 @@ using System.Windows.Input;
 
 namespace StockApp.ViewModels
 {
-    public class LiveResultViewModel : BaseViewModel, IDialogRequestClose, ILiveResultViewModel
+    public class LiveResultViewModel : BaseViewModel, IDialogRequestClose, ILiveResultViewModel, IDisposable
     {
         public event EventHandler<WindowCloseRequestedEventArgs> WindowCloseRequested;
         public event EventHandler<DialogCloseRequestedEventArgs> DialogCloseRequested;
 
-        readonly Tournament tournament;
+        readonly Turnier turnier;
+        readonly TeamBewerb bewerb;
         readonly NetworkService networkService;
-
-        public LiveResultViewModel(Tournament tournament, NetworkService networkService)
+       
+        public LiveResultViewModel(Turnier turnier)
         {
-            this.tournament = tournament;
-            this.networkService = networkService;
-            tournament.PropertyChanged += Tournament_PropertyChanged;
+            if (turnier.Wettbewerb is Zielbewerb) throw new NotImplementedException("Zielbewerb ist nicht implementiert");
+           
+            this.turnier = turnier;
+            this.bewerb = turnier.Wettbewerb as TeamBewerb;
+            this.networkService = NetworkService.Instance;
+            this.bewerb.PropertyChanged += Tournament_PropertyChanged;
             networkService.StartStopStateChanged += NetworkService_StartStopStateChanged;
         }
 
@@ -35,25 +40,22 @@ namespace StockApp.ViewModels
             RaisePropertyChanged(nameof(Ergebnisliste));
         }
 
+        public void Dispose()
+        {
+            this.networkService.StartStopStateChanged -= NetworkService_StartStopStateChanged;
+        }
+
         private bool isLive;
         /// <summary>
         /// Zeige Ergebnis aus StockTV nach jeder Kehre (true) oder nach jedem Spiel (false)
         /// </summary>
         public bool IsLive
         {
-            get
-            {
-                return isLive;
-            }
+            get => isLive;
             set
             {
-                if (isLive == value)
-                {
-                    return;
-                }
-                isLive = value;
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Ergebnisliste));
+                if (SetProperty(ref isLive, value))
+                    RaisePropertyChanged(nameof(Ergebnisliste));
             }
         }
 
@@ -63,14 +65,8 @@ namespace StockApp.ViewModels
         /// </summary>
         public bool ShowStockPunkte
         {
-            get { return showStockPunkte; }
-            set
-            {
-                if (showStockPunkte == value) return;
-
-                showStockPunkte = value;
-                RaisePropertyChanged();
-            }
+            get => showStockPunkte;
+            set => SetProperty(ref showStockPunkte, value);
         }
 
         private bool showDifferenz;
@@ -79,15 +75,8 @@ namespace StockApp.ViewModels
         /// </summary>
         public bool ShowDifferenz
         {
-            get { return showDifferenz; }
-            set
-            {
-                if (ShowDifferenz == value) return;
-
-                showDifferenz = value;
-                RaisePropertyChanged();
-
-            }
+            get => showDifferenz;
+            set => SetProperty(ref showDifferenz, value);
         }
 
         /// <summary>
@@ -95,13 +84,14 @@ namespace StockApp.ViewModels
         /// </summary>
         public bool IsListenerOnline
         {
-            get
-            {
-                return this.networkService?.IsRunning() ?? false;
-            }
+            get => this.networkService.IsRunning();
             set
             {
-                this.networkService.SwitchStartStopState();
+                if (this.networkService.IsRunning())
+                    this.networkService.Stop();
+                else
+                    this.networkService.Start();
+
                 RaisePropertyChanged();
             }
         }
@@ -110,11 +100,12 @@ namespace StockApp.ViewModels
         {
             get
             {
-                if (this.tournament.SpielGruppe == 0)
+                var w = turnier.Wettbewerb as TeamBewerb;
+                if (w.SpielGruppe == 0)
                     return "StockApp Live-Ergebnis";
                 else
                 {
-                    return $"StockApp Live-Ergebnis --> Gruppe:{tournament.SpielGruppeString()}";
+                    return $"StockApp Live-Ergebnis --> Gruppe:{w.SpielGruppeString()}";
                 }
             }
         }
@@ -155,7 +146,7 @@ namespace StockApp.ViewModels
             {
                 var liste = new ObservableCollection<(int _platzierung, Team _team, bool _isLive)>();
                 int i = 1;
-                foreach (var t in tournament.GetTeamsRanked(IsLive))
+                foreach (var t in bewerb.GetTeamsRanked(IsLive))
                 {
                     liste.Add((i, t, this.IsLive));
                     i++;
@@ -198,3 +189,4 @@ namespace StockApp.ViewModels
 
 
 }
+

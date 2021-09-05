@@ -10,11 +10,13 @@ namespace StockApp.Output.Results
     public class Result
     {
         private FixedDocument document;
-        private readonly Tournament tournament;
+        private readonly TeamBewerb teamBewerb;
+        private readonly Turnier turnier;
 
-        public Result(Tournament tournament)
+        public Result(Turnier turnier)
         {
-            this.tournament = tournament;
+            this.turnier = turnier;
+            this.teamBewerb = turnier.Wettbewerb as TeamBewerb;
         }
 
 
@@ -25,48 +27,49 @@ namespace StockApp.Output.Results
 
             //Ergebnisliste - Überschriften
             var ergListe = new ucResult();
-            ergListe._ArtDesWettbewerbs.Content = tournament.TournamentName;
-            ergListe._Austragungsort.Content = tournament.Venue;
-            ergListe._Durchführer.Content = tournament.Operator;
-            ergListe._Veranstalter.Content = tournament.Organizer;
-            ergListe._Datum.Content = tournament.DateOfTournament.ToString("dddd, dd.MM.yyyy");
+            ergListe._ArtDesWettbewerbs.Content = turnier.OrgaDaten.TournamentName;
+            ergListe._Austragungsort.Content = turnier.OrgaDaten.Venue;
+            ergListe._Durchführer.Content = turnier.OrgaDaten.Operator;
+            ergListe._Veranstalter.Content = turnier.OrgaDaten.Organizer;
+            ergListe._Datum.Content = turnier.OrgaDaten.DateOfTournament.ToString("dddd, dd.MM.yyyy");
 
 
-            var rankedTeams = tournament.GetTeamsRanked();
+            var rankedTeams = teamBewerb.GetTeamsRanked();
             int r = 1;
-            
+
             foreach (var team in rankedTeams)
             {
-                var spT = new ucStackPanelTeam(r, team, (r <= tournament.NumberOfTeamsWithNamedPlayerOnResult));
+                var spT = new ucStackPanelTeam(r, team, (r <= teamBewerb.NumberOfTeamsWithNamedPlayerOnResult));
                 r++;
                 ergListe._spTeams.Children.Add(spT);
             }
 
             //Eintragen der Offiziellen
-            if (string.IsNullOrWhiteSpace(tournament.Referee.Name)){
+            if (string.IsNullOrWhiteSpace(turnier.OrgaDaten.Referee.Name))
+            {
                 ergListe._stackPanelSchiedsrichter.Visibility = Visibility.Collapsed;
             }
-            ergListe._textblockSchiedsrichterName.Text = tournament.Referee.Name;
-            ergListe._textblockSchiedsrichterClub.Text = tournament.Referee.ClubName;
+            ergListe._textblockSchiedsrichterName.Text = turnier.OrgaDaten.Referee.Name;
+            ergListe._textblockSchiedsrichterClub.Text = turnier.OrgaDaten.Referee.ClubName;
 
-            if (string.IsNullOrWhiteSpace(tournament.CompetitionManager.Name))
+            if (string.IsNullOrWhiteSpace(turnier.OrgaDaten.CompetitionManager.Name))
             {
                 ergListe._stackPanelWettbewerbsleiter.Visibility = Visibility.Collapsed;
             }
-            ergListe._textblockWettbewerbsleiterName.Text = tournament.CompetitionManager.Name;
-            ergListe._textblockWettbewerbsleiterClub.Text = tournament.CompetitionManager.ClubName;
+            ergListe._textblockWettbewerbsleiterName.Text = turnier.OrgaDaten.CompetitionManager.Name;
+            ergListe._textblockWettbewerbsleiterClub.Text = turnier.OrgaDaten.CompetitionManager.ClubName;
 
-            if (string.IsNullOrWhiteSpace(tournament.ComputingOfficer.Name))
+            if (string.IsNullOrWhiteSpace(turnier.OrgaDaten.ComputingOfficer.Name))
             {
                 ergListe._stackPanelRechenbüro.Visibility = Visibility.Collapsed;
             }
-            ergListe._textblockRechenbüroName.Text = tournament.ComputingOfficer.Name;
-            ergListe._textblockRechenbüroClub.Text = tournament.ComputingOfficer.ClubName;
+            ergListe._textblockRechenbüroName.Text = turnier.OrgaDaten.ComputingOfficer.Name;
+            ergListe._textblockRechenbüroClub.Text = turnier.OrgaDaten.ComputingOfficer.ClubName;
 
             SetPagePanelToDocument(ergListe);
             return document;
 
-            
+
         }
 
 

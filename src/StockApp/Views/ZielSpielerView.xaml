@@ -1,0 +1,492 @@
+﻿<UserControl x:Class="StockApp.Views.ZielSpielerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:StockApp.Converters"
+             xmlns:viewmodels="clr-namespace:StockApp.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance 
+                            Type=viewmodels:ZielSpielerDesignViewModel, 
+                            IsDesignTimeCreatable=True}"
+             d:DesignStyle="{StaticResource designBackground}">
+
+    <UserControl.Resources>
+        <converters:ValueNotNullToVisibilityConverter x:Key="ValueNotNullToVisibility"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBoolenToVisibilityConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BoolenToVisibilityConverter"/>
+        <converters:NumberGE0ToTextConverter x:Key="NumberToTextConverter"/>
+    </UserControl.Resources>
+
+    <d:DesignerProperties.DesignStyle x:Name="designBackground">
+        <Style TargetType="UserControl">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Width" Value="1024"/>
+            <Setter Property="Height" Value="800"/>
+        </Style>
+    </d:DesignerProperties.DesignStyle>
+
+
+    <Grid Margin="20,10">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <!--#region  Startliste-->
+        <StackPanel Grid.Row="0" Grid.Column="0" x:Name="startlisteStackPanel"
+                    CanHorizontallyScroll="True"
+                    Width="400">
+            <Label Content="Startliste" FontWeight="Bold" FontSize="18"/>
+
+            <!--#region Buttons links oben-->
+            <StackPanel
+                    Orientation="Horizontal" 
+                    x:Name="stackPanelButtons">
+                <Button Content="Hinzufügen" 
+                    Command="{Binding Path=AddPlayerCommand}" 
+                    Margin="0,10" Padding="10"/>
+                <Button Content="Entfernen" 
+                    Command="{Binding Path=RemovePlayerCommand}" 
+                    Margin="20,10" Padding="10"/>
+
+            </StackPanel>
+            <!--#endregion-->
+
+            <DataGrid Margin="0,10,0,0" 
+                      Name="dgStartliste"
+                      ItemsSource="{Binding Path=Players}"
+                      AutoGenerateColumns="False"
+                      SelectedItem="{Binding Path=SelectedPlayer}"
+                      SelectionUnit="FullRow"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeColumns="False"
+                      RowHeaderWidth="0"
+                      IsReadOnly="True"
+                      Width="{Binding ElementName=startlisteStackPanel, Path=ActualWidth}"
+                      Background="Transparent"
+                      AllowDrop="True"
+                      SelectionMode="Extended">
+
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DarkKhaki"/>
+                </DataGrid.Resources>
+
+                <DataGrid.Columns>
+
+                    <DataGridTextColumn Header="Start#" 
+                                        Binding="{Binding Path=Startnummer}"
+                                        Width="auto"
+                                        CanUserResize="False"
+                                        CanUserSort="False">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Setter Property="Margin" Value="10"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Spielername" 
+                                        Binding="{Binding Path=Name}"
+                                        CanUserResize="False"
+                                        CanUserSort="False"
+                                        Width="*">
+
+                        <DataGridTextColumn.ElementStyle>
+
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="Padding" Value="10"/>
+                            </Style>
+
+                        </DataGridTextColumn.ElementStyle>
+
+                    </DataGridTextColumn>
+
+
+
+                </DataGrid.Columns>
+
+            </DataGrid>
+
+        </StackPanel>
+        <!--#endregion-->
+
+        <!--#region Spielerdaten und Wertungen-->
+        <StackPanel Grid.Column="1" 
+                    Margin="20,0" 
+                    Width="450"
+                    Visibility="{Binding Path=SelectedPlayer, Converter={StaticResource ValueNotNullToVisibility}}">
+
+            <!--#region Spielerdaten-->
+
+            <StackPanel>
+
+                <Label Content="Spielerdaten" FontWeight="Bold" FontSize="18"/>
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Row="0" Grid.Column="0" Margin="0,10,0,0"
+                           Content="Nachname:"  HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,10,0,0"
+                             Text="{Binding Path=SelectedPlayer.LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalContentAlignment="Center" 
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             MaxLength="30"/>
+
+                    <Label Grid.Row="1" Grid.Column="0" Margin="0,10,0,0"
+                           Content="Vorname:" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,10,0,0"
+                             Text="{Binding Path=SelectedPlayer.FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalContentAlignment="Left" 
+                             VerticalContentAlignment="Center"
+                             MaxLength="30"/>
+
+                    <Label Grid.Row="2" Grid.Column="0" Margin="0,10,0,0"
+                           Content="Verein:" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Margin="0,10,0,0"
+                             Text="{Binding Path=SelectedPlayer.Vereinsname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalContentAlignment="Left" 
+                             VerticalContentAlignment="Center"
+                             MaxLength="40"/>
+
+                    <Label Grid.Row="3" Grid.Column="0" Margin="0,10,0,0"
+                           Content="Nation:" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Margin="0,10,0,0"
+                             Text="{Binding Path=SelectedPlayer.Nation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalContentAlignment="Left" 
+                             VerticalContentAlignment="Center"
+                             MaxLength="40"/>
+                    
+                    <Label Grid.Row="4" Grid.Column="0" Margin="0,10,0,0"
+                           Content="Passnummer:" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Margin="0,10,0,0"
+                             Text="{Binding Path=SelectedPlayer.LicenseNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalContentAlignment="Left" 
+                             VerticalContentAlignment="Center"
+                             MaxLength="10"/>
+
+                </Grid>
+
+            </StackPanel>
+
+            <!--#endregion-->
+
+
+            <!--#region  Liste der Wertungen-->
+
+            <StackPanel Visibility="{Binding Path=SelectedPlayer, Converter={StaticResource ValueNotNullToVisibility}}">
+
+                <Label Content="Wertungen" FontWeight="Bold" Margin="0,35,0,0"/>
+
+                <StackPanel Orientation="Horizontal">
+
+                    <Button Content="Hinzufügen" 
+                                Command="{Binding Path=AddWertungCommand}"
+                                Margin="0,10" Padding="10" HorizontalAlignment="Left"/>
+                    <Button Content="Entfernen" 
+                                Command="{Binding Path=RemoveWertungCommand}"
+                                Margin="20,10" Padding="10" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <DataGrid ItemsSource="{Binding Path=SelectedPlayer.Wertungen}"
+                          SelectedItem="{Binding Path=SelectedWertung, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Extended"
+                          SelectionUnit="FullRow"
+                          RowHeaderWidth="0"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          Height="auto" 
+                          Width="auto">
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Background" Value="LightGray"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.Resources>
+
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DarkKhaki"/>
+
+                        <Style x:Key="colHeaderCenter" TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+
+                        <Style x:Key="verticalCenter" TargetType="{x:Type TextBlock}">
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="TextAlignment" Value="Center"/>
+                        </Style>
+
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="Nr#" 
+                                                Binding="{Binding Nummer}" 
+                                                HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                                Width="auto"/>
+
+                        <DataGridTextColumn Header="Mitte" 
+                                                Binding="{Binding PunkteMassenMitte}"
+                                                HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                                Width="*"/>
+
+                        <DataGridTextColumn Header="Schuss" 
+                                                Binding="{Binding PunkteSchuesse}"
+                                                HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                                Width="*"/>
+
+                        <DataGridTextColumn Header="Seite" 
+                                                Binding="{Binding PunkteMassenSeitlich}"
+                                                HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                                Width="*"/>
+
+                        <DataGridTextColumn Header="Kombi" 
+                                                Binding="{Binding PunkteKombinieren}"
+                                                HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                                Width="*"/>
+
+                        <DataGridTextColumn Header="Gesamt" 
+                                                Binding="{Binding GesamtPunkte}"
+                                                HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                                Width="1.2*"/>
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+            </StackPanel>
+
+            <!--#endregion-->
+
+
+            <!--#region WERTUNG-->
+
+            <StackPanel Visibility="{Binding Path=SelectedWertung, Converter={StaticResource ValueNotNullToVisibility}}">
+
+                <Label Content="Wertung" FontWeight="Bold" Margin="0,35,0,0"/>
+
+                <Grid HorizontalAlignment="Center" 
+                      Width="{Binding ElementName=dgDisziplinen, Path=ActualWidth}">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" 
+                                Grid.Column="0" 
+                                HorizontalAlignment="Left">
+                        <Label Content="# " 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=SelectedWertung.Nummer}" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+                        <Label Content="Gesamt: " HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=SelectedWertung.GesamtPunkte}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <DataGrid ItemsSource="{Binding Path=SelectedWertung.Disziplinen}"
+                          x:Name="dgDisziplinen"
+                          IsReadOnly="{Binding Path=SelectedWertung.IsOnline}"
+                          SelectionMode="Single"
+                          RowHeaderWidth="0"
+                          CanUserReorderColumns="False"
+                          CanUserSortColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          HorizontalAlignment="Left"
+                          AutoGenerateColumns="False"
+                          Width="auto">
+
+                    <DataGrid.Resources>
+
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="Background" Value="Green"/>
+                                </Trigger>
+                            </Style.Triggers>
+
+                        </Style>
+
+                        <Style x:Key="colHeaderCenter" TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+
+                        <Style x:Key="verticalCenter" TargetType="{x:Type TextBlock}">
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="TextAlignment" Value="Center"/>
+                        </Style>
+                        <Style x:Key="editTextBox" TargetType="{x:Type TextBox}">
+                            <Setter Property="TextAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="Background" Value="Green"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                    </DataGrid.Resources>
+
+
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="Disziplin"
+                                            Width="auto"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            Binding="{Binding Path=Name, Mode=OneWay}">
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="1"
+                                            Width="*" 
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"  
+                                            Binding="{Binding Path=Versuch1, 
+                                                              Converter={StaticResource NumberToTextConverter},
+                                                              UpdateSourceTrigger=LostFocus}">
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="2" 
+                                            HeaderStyle="{StaticResource colHeaderCenter}" 
+                                            ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"
+                                            Width="*"
+                                            Binding="{Binding Path=Versuch2, 
+                                                              Converter={StaticResource NumberToTextConverter},
+                                                              UpdateSourceTrigger=LostFocus}">
+
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="3"
+                                            Width="*"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"  
+                                            Binding="{Binding Path=Versuch3, 
+                                                              Converter={StaticResource NumberToTextConverter},
+                                                              UpdateSourceTrigger=LostFocus}">
+
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="4"
+                                            Width="*"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"  
+                                            Binding="{Binding Path=Versuch4, 
+                                                              Converter={StaticResource NumberToTextConverter},
+                                                              UpdateSourceTrigger=LostFocus}">
+
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="5"
+                                            Width="*"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"  
+                                            Binding="{Binding Path=Versuch5, 
+                                                              Converter={StaticResource NumberToTextConverter},
+                                                              UpdateSourceTrigger=LostFocus}">
+
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="6"
+                                            Width="*"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                            EditingElementStyle="{StaticResource editTextBox}"  
+                                            Binding="{Binding Path=Versuch6, 
+                                                              Converter={StaticResource NumberToTextConverter},
+                                                              UpdateSourceTrigger=LostFocus}">
+
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Summe"
+                                            Width="2*"
+                                            HeaderStyle="{StaticResource colHeaderCenter}" ElementStyle="{StaticResource verticalCenter}"
+                                            Binding="{Binding Path=Summe, Mode=OneWay}">
+                        </DataGridTextColumn>
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+
+
+                <StackPanel Orientation="Horizontal"
+                            Width="{Binding ElementName=dgDisziplinen, Path=ActualWidth}"
+                            Margin="0,10"
+                            Grid.Column="0" 
+                            HorizontalAlignment="Left" Grid.ColumnSpan="2">
+
+                    <Label Content="Auf Bahn# "
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                    <Label Content="{Binding Path=SelectedPlayer.AktuelleBahn}"
+                           Visibility="{Binding Path=SelectedPlayer.HasOnlineWertung, Converter={StaticResource BoolenToVisibilityConverter}}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                    <ComboBox ItemsSource="{Binding Path=Bewerb.FreieBahnen}"
+                              SelectedItem="{Binding Path=SelectedZielBahn}"
+                              Visibility="{Binding Path=SelectedPlayer.HasOnlineWertung, 
+                                                   Converter={StaticResource InvertedBoolenToVisibilityConverter}}"
+                              MinWidth="50"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+
+                    <Button Command="{Binding Path=SetWertungOnlineCommand}"
+                            Content="Online" Margin="10,0"
+                            Padding="5"/>
+
+                    <Label Content="Online"
+                           Foreground="Red"
+                           FontWeight="Bold"
+                           Visibility="{Binding Path=SelectedPlayer.HasOnlineWertung, Converter={StaticResource BoolenToVisibilityConverter}}"
+                           Margin="10,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                </StackPanel>
+
+
+            </StackPanel>
+
+            <!--#endregion-->
+
+        </StackPanel>
+        <!--#endregion-->
+
+    </Grid>
+
+</UserControl>

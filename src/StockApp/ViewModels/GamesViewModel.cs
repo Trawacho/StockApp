@@ -14,15 +14,17 @@ namespace StockApp.ViewModels
     {
         #region Fields
 
-        private readonly Tournament tournament;
+        private readonly TeamBewerb tournament;
+        private readonly StockTVs stockTVs;
 
         #endregion
 
         #region Constructor
 
-        public GamesViewModel(Tournament tournament)
+        public GamesViewModel(TeamBewerb tournament, StockTVs stockTVs)
         {
             this.tournament = tournament;
+            this.stockTVs = stockTVs;
             ConcatRoundsOnOutput = false;
             TeamNameOnTurnCards = false;
         }
@@ -35,13 +37,7 @@ namespace StockApp.ViewModels
         /// <summary>
         /// Anzahl der Spielbahnen
         /// </summary>
-        public int NumberOfCourts
-        {
-            get
-            {
-                return tournament.NumberOfCourts;
-            }
-        }
+        public int NumberOfCourts => tournament.NumberOfCourts;
 
 
         /// <summary>
@@ -49,10 +45,7 @@ namespace StockApp.ViewModels
         /// </summary>
         public int NumberOfGameRounds
         {
-            get
-            {
-                return tournament.NumberOfGameRounds;
-            }
+            get => tournament.NumberOfGameRounds;
             set
             {
                 if (tournament.NumberOfGameRounds == value) return;
@@ -69,7 +62,7 @@ namespace StockApp.ViewModels
         /// </summary>
         public bool TwoPauseGames
         {
-            get { return tournament.TwoPauseGames; }
+            get => tournament.TwoPauseGames;
             set
             {
                 if (tournament.TwoPauseGames == value) return;
@@ -83,15 +76,11 @@ namespace StockApp.ViewModels
 
         public bool IsStartOfGameChanged
         {
-            get
-            {
-                return tournament.NumberOfGameRounds > 1
-                        ? tournament.StartingTeamChange
-                        : false;
-            }
+            get => tournament.NumberOfGameRounds > 1 && tournament.StartingTeamChange;
             set
             {
                 if (tournament.StartingTeamChange == value) return;
+
                 tournament.StartingTeamChange = value;
                 tournament.RemoveAllGames();
                 RaisePropertyChanged();
@@ -101,21 +90,12 @@ namespace StockApp.ViewModels
         /// <summary>
         /// Liste der Reellen Teams
         /// </summary>
-        public ObservableCollection<Team> Teams
-        {
-            get
-            {
-                return new ObservableCollection<Team>(tournament.Teams.Where(t => !t.IsVirtual));
-            }
-        }
+        public ObservableCollection<Team> Teams => new(tournament.Teams.Where(t => !t.IsVirtual));
 
 
         public bool IsDirectionOfCourtsFromRightToLeft
         {
-            get
-            {
-                return tournament.IsDirectionOfCourtsFromRightToLeft;
-            }
+            get => tournament.IsDirectionOfCourtsFromRightToLeft;
             set
             {
                 if (tournament.IsDirectionOfCourtsFromRightToLeft == value) return;
@@ -126,45 +106,26 @@ namespace StockApp.ViewModels
             }
         }
 
-        public string DirectionOfCourtsDescription
-        {
-            get
-            {
-                return IsDirectionOfCourtsFromRightToLeft
-                    ? "1. Bahn rechts, weitere folgen links"
-                    : "1. Bahn links, weitere folgen rechts";
-            }
-        }
+        public string DirectionOfCourtsDescription => IsDirectionOfCourtsFromRightToLeft
+                                                        ? "1. Bahn rechts, weitere folgen links"
+                                                        : "1. Bahn links, weitere folgen rechts";
 
 
         private bool concatRoundsOnOutput;
         public bool ConcatRoundsOnOutput
         {
-            get
-            {
-                return NumberOfGameRounds > 1
-                        ? concatRoundsOnOutput
-                        : false;
-            }
-            set
-            {
-                if (concatRoundsOnOutput == value) return;
-
-                concatRoundsOnOutput = value;
-                RaisePropertyChanged();
-            }
+            get => NumberOfGameRounds > 1 && concatRoundsOnOutput;
+            set => SetProperty(ref concatRoundsOnOutput, value);
         }
 
         public bool TeamNameOnTurnCards { get; set; }
 
         public bool Is8KehrenSpiel
         {
-            get
+            get => tournament.Is8TurnsGame;
+            set 
             {
-                return tournament.Is8TurnsGame;
-            }
-            set
-            {
+                if (tournament.Is8TurnsGame == value) return;
                 tournament.Is8TurnsGame = value;
                 RaisePropertyChanged();
             }
@@ -173,17 +134,8 @@ namespace StockApp.ViewModels
         private bool isTurnCardForStockTv;
         public bool IsTurnCardForStockTV
         {
-            get
-            {
-                return isTurnCardForStockTv;
-            }
-            set
-            {
-                if (isTurnCardForStockTv == value)
-                    return;
-                isTurnCardForStockTv = value;
-                RaisePropertyChanged();
-            }
+            get => isTurnCardForStockTv;
+            set => SetProperty(ref isTurnCardForStockTv, value);
         }
 
         #endregion
@@ -195,14 +147,48 @@ namespace StockApp.ViewModels
         {
             get
             {
-                return _createGamesCommand ?? (_createGamesCommand = new RelayCommand(
+                return _createGamesCommand ??= new RelayCommand(
                     (p) =>
                     {
                         tournament.ReCreateGames();
                         RaisePropertyChanged(nameof(Teams));
                     }
-                    ));
+                    );
 
+            }
+        }
+        
+        
+        private ICommand _sendTeamsToStockTVCommand;
+        public ICommand SendTeamsToStockTVCommand
+        {
+            get
+            {
+                return _sendTeamsToStockTVCommand ??= new RelayCommand(
+                    (p) =>
+                    {
+                        var bahnNummern = tournament.GetAllGames().Where(b => b.CourtNumber > 0) .Select(x => x.CourtNumber).Distinct();
+                        var spielGruppe = tournament.SpielGruppe;
+                        foreach (var bahn in bahnNummern)
+                        {
+                            var stockTV = stockTVs?.FirstOrDefault(a => a.TVSettings.Spielgruppe == spielGruppe && a.TVSettings.Bahn == bahn);
+
+                            if (stockTV == null) continue;
+
+                            var spieleAufBahnX = tournament.GetAllGames()
+                                                            .Where(g => g.CourtNumber == bahn)
+                                                            .Select(b => new StockTVBegegnung()
+                                                            {
+                                                                SpielNummer = b.GameNumber,
+                                                                TeamNameA = b.TeamA.TeamName,
+                                                                TeamNameB = b.TeamB.TeamName
+                                                            });
+
+                            stockTV.SendTeamNames(spieleAufBahnX);
+                        }
+                    },
+                    (p) => tournament.GetAllGames().Count() > 1
+                    );
             }
         }
 
@@ -231,9 +217,9 @@ namespace StockApp.ViewModels
                     );
             }
         }
+        
 
         private ICommand _printBahnblockCommand;
-
         public ICommand PrintBahnblockCommand
         {
             get
@@ -260,7 +246,7 @@ namespace StockApp.ViewModels
 
     public class GamesDesignViewModel : IGamesViewModel
     {
-        private readonly Tournament t = new Tournament();
+        private readonly TeamBewerb t = new TeamBewerb();
 
         public GamesDesignViewModel()
         {
@@ -288,13 +274,12 @@ namespace StockApp.ViewModels
         }
 
         public bool Is8KehrenSpiel { get; set; } = true;
-
         public bool IsTurnCardForStockTV { get; set; } = true;
+        public bool IsStartOfGameChanged { get; set; } = true;
 
         public ICommand CreateGamesCommand { get; }
+        public ICommand SendTeamsToStockTVCommand { get; }
         public ICommand PrintTurnCardsCommand { get; }
-
         public ICommand PrintBahnblockCommand { get; }
-        public bool IsStartOfGameChanged { get; set; } = true;
     }
 }

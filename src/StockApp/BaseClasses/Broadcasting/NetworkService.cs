@@ -1,42 +1,38 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
 namespace StockApp.BaseClasses
 {
-    public delegate void NetworkServiceEventHandler(object sender, NetworkServiceDataReceivedEventArgs e);
-
-    public class NetworkService
+    public delegate void NetworkServiceDataReceivedEventHandler(object sender, NetworkServiceDataReceivedEventArgs e);
+    public delegate void NetworkServiceStateChangedEventHandler(object sender, NetworkServiceStateEventArgs e);
+    public sealed class NetworkService
     {
+        private static readonly Lazy<NetworkService> lazy =
+        new Lazy<NetworkService>(() => new NetworkService());
+
+        public static NetworkService Instance { get { return lazy.Value; } }
+
         private UdpClient udpClient;
         private UdpState state;
 
-        public event EventHandler StartStopStateChanged;
-        protected virtual void OnStartStopStateChanged(bool isRunning)
+        public event NetworkServiceStateChangedEventHandler StartStopStateChanged;
+        void OnStartStopStateChanged(bool isRunning)
         {
-            StartStopStateChanged?.Invoke(this, new NetworkServiceEventArgs(isRunning));
+            StartStopStateChanged?.Invoke(this, new NetworkServiceStateEventArgs(isRunning));
         }
 
-        public event NetworkServiceEventHandler DataReceived;
-        protected virtual void RaiseDataReceived(byte[] data)
+        public event NetworkServiceDataReceivedEventHandler DataReceived;
+        void RaiseDataReceived(byte[] data)
         {
             DataReceived?.Invoke(this, new NetworkServiceDataReceivedEventArgs(data));
         }
 
-        private class UdpState
+        private NetworkService()
         {
-            public UdpClient udpClient;
-            public IPEndPoint ipEndPoint;
-            public IAsyncResult result;
-        }
-
-
-        public NetworkService()
-        {
-
+                
         }
 
 
@@ -57,7 +53,7 @@ namespace StockApp.BaseClasses
                 state = new UdpState()
                 {
                     udpClient = udpClient,
-                    ipEndPoint = new IPEndPoint(0, 0),
+                    ipEndPoint = new IPEndPoint(0,0),
                 };
             }
 
@@ -67,16 +63,11 @@ namespace StockApp.BaseClasses
 
         public void Stop()
         {
-            if (udpClient != null)
-            {
-                udpClient.Dispose();
-                udpClient = null;
-            }
-            if (state != null)
-            {
-                state.udpClient = null;
-                state = null;
-            }
+            udpClient.Close();
+            udpClient.Dispose();
+            udpClient = null;
+            state.udpClient = null;
+            state = null;
 
             OnStartStopStateChanged(false);
         }
@@ -84,14 +75,6 @@ namespace StockApp.BaseClasses
         public bool IsRunning()
         {
             return (udpClient != null);
-        }
-
-        public void SwitchStartStopState()
-        {
-            if (IsRunning())
-                Stop();
-            else
-                Start();
         }
 
         private void ReceiveBroadcast()
@@ -115,9 +98,9 @@ namespace StockApp.BaseClasses
 
                 r = u?.BeginReceive(new AsyncCallback(ReceiveCallback), state);
             }
-            catch (ObjectDisposedException e)
+            catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine($"ReceiveCallback: {e.Message}");
             }
         }
 
@@ -137,5 +120,11 @@ namespace StockApp.BaseClasses
         }
 
 
+        private class UdpState
+        {
+            public UdpClient udpClient;
+            public IPEndPoint ipEndPoint;
+            public IAsyncResult result;
+        }
     }
 }

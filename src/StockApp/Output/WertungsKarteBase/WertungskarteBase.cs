@@ -17,7 +17,7 @@ namespace StockApp.Output.WertungsKarteBase
 
         }
 
-        public FixedDocument GetDocument(Size pageSize, Tournament tournament, bool printTeamName, bool concatRounds)
+        public FixedDocument GetDocument(Size pageSize, TeamBewerb tournament, bool printTeamName, bool concatRounds)
         {
             document = new FixedDocument();
             document.DocumentPaginator.PageSize = pageSize;

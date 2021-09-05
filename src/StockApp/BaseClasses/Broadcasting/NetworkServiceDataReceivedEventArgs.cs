@@ -13,5 +13,4 @@ namespace StockApp.BaseClasses
         public NetworkTelegram NetworkTelegram => new NetworkTelegram(Data);
 
     }
-
 }

@@ -20,6 +20,7 @@ namespace StockApp.Interfaces
         
        
         ICommand CreateGamesCommand { get; }
+        ICommand SendTeamsToStockTVCommand { get; }
         ICommand PrintTurnCardsCommand { get; }
         ICommand PrintBahnblockCommand { get; }
     }

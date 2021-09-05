@@ -17,7 +17,7 @@ namespace StockApp.Output.Bahnblock
 
         }
 
-        public FixedDocument GetDocument(Size pageSize, Tournament tournament)
+        public FixedDocument GetDocument(Size pageSize, TeamBewerb tournament)
         {
             document = new FixedDocument();
             document.DocumentPaginator.PageSize = pageSize;

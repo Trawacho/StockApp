@@ -1,5 +1,4 @@
-﻿using StockApp.BaseClasses;
-using StockApp.Dialogs;
+﻿using StockApp.Dialogs;
 using StockApp.ViewModels;
 using StockApp.Views;
 using System;
@@ -19,6 +18,7 @@ namespace StockApp
 
             IDialogService dialogService = new DialogService(MainWindow);
             dialogService.Register<LiveResultViewModel, LiveResultView>();
+            dialogService.Register<LiveZielResultViewModel, LiveZielResultView>();
 
             viewModel = new MainViewModel(dialogService);
             var view = new MainWindow()
@@ -27,13 +27,20 @@ namespace StockApp
             };
             viewModel.ExitApplicationAction = new Action(view.Close);
 
+
             view.ShowDialog();
         }
         protected override void OnExit(ExitEventArgs e)
         {
-            viewModel.ExitApplication();
-
-            base.OnExit(e);
+            try
+            {
+                viewModel.StopNetMq();
+                NetMQ.NetMQConfig.Cleanup(block: false);
+            }
+            finally
+            {
+                base.OnExit(e);
+            }
             Application.Current.Shutdown(0);
         }
     }
