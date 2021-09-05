@@ -15,14 +15,16 @@ namespace StockApp.ViewModels
         #region Fields
 
         private readonly TeamBewerb tournament;
+        private readonly StockTVs stockTVs;
 
         #endregion
 
         #region Constructor
 
-        public GamesViewModel(TeamBewerb tournament)
+        public GamesViewModel(TeamBewerb tournament, StockTVs stockTVs)
         {
             this.tournament = tournament;
+            this.stockTVs = stockTVs;
             ConcatRoundsOnOutput = false;
             TeamNameOnTurnCards = false;
         }
@@ -60,7 +62,7 @@ namespace StockApp.ViewModels
         /// </summary>
         public bool TwoPauseGames
         {
-            get => tournament.TwoPauseGames; 
+            get => tournament.TwoPauseGames;
             set
             {
                 if (tournament.TwoPauseGames == value) return;
@@ -88,7 +90,7 @@ namespace StockApp.ViewModels
         /// <summary>
         /// Liste der Reellen Teams
         /// </summary>
-        public ObservableCollection<Team> Teams=>new(tournament.Teams.Where(t => !t.IsVirtual));
+        public ObservableCollection<Team> Teams => new(tournament.Teams.Where(t => !t.IsVirtual));
 
 
         public bool IsDirectionOfCourtsFromRightToLeft
@@ -121,7 +123,7 @@ namespace StockApp.ViewModels
         public bool Is8KehrenSpiel
         {
             get => tournament.Is8TurnsGame;
-            set
+            set 
             {
                 if (tournament.Is8TurnsGame == value) return;
                 tournament.Is8TurnsGame = value;
@@ -155,6 +157,40 @@ namespace StockApp.ViewModels
 
             }
         }
+        
+        
+        private ICommand _sendTeamsToStockTVCommand;
+        public ICommand SendTeamsToStockTVCommand
+        {
+            get
+            {
+                return _sendTeamsToStockTVCommand ??= new RelayCommand(
+                    (p) =>
+                    {
+                        var bahnNummern = tournament.GetAllGames().Where(b => b.CourtNumber > 0) .Select(x => x.CourtNumber).Distinct();
+                        var spielGruppe = tournament.SpielGruppe;
+                        foreach (var bahn in bahnNummern)
+                        {
+                            var stockTV = stockTVs?.FirstOrDefault(a => a.TVSettings.Spielgruppe == spielGruppe && a.TVSettings.Bahn == bahn);
+
+                            if (stockTV == null) continue;
+
+                            var spieleAufBahnX = tournament.GetAllGames()
+                                                            .Where(g => g.CourtNumber == bahn)
+                                                            .Select(b => new StockTVBegegnung()
+                                                            {
+                                                                SpielNummer = b.GameNumber,
+                                                                TeamNameA = b.TeamA.TeamName,
+                                                                TeamNameB = b.TeamB.TeamName
+                                                            });
+
+                            stockTV.SendTeamNames(spieleAufBahnX);
+                        }
+                    },
+                    (p) => tournament.GetAllGames().Count() > 1
+                    );
+            }
+        }
 
 
         private ICommand _printTurnCardsCommand;
@@ -181,9 +217,9 @@ namespace StockApp.ViewModels
                     );
             }
         }
+        
 
         private ICommand _printBahnblockCommand;
-
         public ICommand PrintBahnblockCommand
         {
             get
@@ -238,13 +274,12 @@ namespace StockApp.ViewModels
         }
 
         public bool Is8KehrenSpiel { get; set; } = true;
-
         public bool IsTurnCardForStockTV { get; set; } = true;
+        public bool IsStartOfGameChanged { get; set; } = true;
 
         public ICommand CreateGamesCommand { get; }
+        public ICommand SendTeamsToStockTVCommand { get; }
         public ICommand PrintTurnCardsCommand { get; }
-
         public ICommand PrintBahnblockCommand { get; }
-        public bool IsStartOfGameChanged { get; set; } = true;
     }
 }

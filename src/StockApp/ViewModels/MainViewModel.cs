@@ -324,7 +324,7 @@ namespace StockApp.ViewModels
                 return _showGamesViewCommand ??= new RelayCommand(
                     (p) =>
                     {
-                        this.ViewModel = new GamesViewModel(_turnier.Wettbewerb as TeamBewerb);
+                        this.ViewModel = new GamesViewModel(_turnier.Wettbewerb as TeamBewerb, _stockTVs);
                     },
                     (p) =>
                     {
