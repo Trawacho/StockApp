@@ -198,43 +198,6 @@ namespace StockApp.ViewModels
 
         #region Commands
 
-
-        private ICommand _testCommand;
-        public ICommand TestCommand
-        {
-            get
-            {
-                return _testCommand ??= new RelayCommand(
-                    (p) =>
-                    {
-                        foreach (StockTV tv in _stockTVs)
-                        {
-                            // for (int i = 0; i < 2; i++)
-                            {
-                                tv.TVSettingsGet();
-                                tv.TVSettings.GameModus = GameModis.Turnier;
-                                tv.TVSettings.PointsPerTurn = 15;
-                                tv.TVSettings.TurnsPerGame = 8;
-                                tv.TVSettingsSend();
-                                tv.TVResultReset();
-
-                                tv.SendTeamNames(new List<StockTVBegegnung>()
-                                {
-                                    new StockTVBegegnung(1, "ESF Hankofen", "EC EBRA Aiterhofen"),
-                                    new StockTVBegegnung(1, "TV Geiselhöring","SV Pilgramsberg"),
-                                    new StockTVBegegnung(3, "DJK Leiblfing", "SV Salching"),
-                                    new StockTVBegegnung(4, "Bavaria mitterharthausen", "EC Obermiethnach")
-                                });
-                            }
-
-                        }
-                    },
-                    (p) => true);
-            }
-        }
-
-
-
         private ICommand _showLiveResultCommand;
         public ICommand ShowLiveResultCommand
         {
