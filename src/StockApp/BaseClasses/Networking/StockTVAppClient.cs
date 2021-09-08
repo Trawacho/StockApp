@@ -111,42 +111,54 @@ namespace StockApp.BaseClasses
             this.IsOnline = e.SocketEvent == SocketEvents.Connected;
         }
 
-
+        StockTVCommand callBackCommand;
         private void Socket_SendReady(object sender, NetMQSocketEventArgs e)
         {
             if (sendQueue.Count > 0)
             {
+                Debug.WriteLine(Identifier + " Disconnect SendReady event");
                 e.Socket.SendReady -= Socket_SendReady;
 
-                if (sendQueue.TryDequeue(out StockTVCommand command, TimeSpan.FromSeconds(50)))
+                if (sendQueue.TryDequeue(out callBackCommand, TimeSpan.FromSeconds(50)))
                 {
-                    e.Socket.SendFrame(command.CommandString(), false);
-                    // var msg = e.Socket.ReceiveMultipartMessage();
-                    
-                    var msg = new NetMQMessage();
-                    if (e.Socket.TryReceiveMultipartMessage(TimeSpan.FromSeconds(2), ref msg))
-                    {
-                        if (msg.FrameCount == 2)
-                        {
-                            string topic = msg.First().ConvertToString();
-                            if (topic.Equals("Settings") || topic.Equals("Result"))
-                            {
-                                command.CallBackAction?.Invoke(msg.Last().ToByteArray());
-                            }
-                        }
-                    }
+                    Debug.WriteLine(Identifier + "Send dequeued command");
+                    e.Socket.SendFrame(callBackCommand.CommandString(), false);
+
+                    Debug.WriteLine(Identifier + " Connect ReceiveReady after sending");
+                    e.Socket.ReceiveReady += Socket_ReceiveReady;
                 }
-
-
-                e.Socket.SendReady += Socket_SendReady;
             }
+           
         }
 
+        private void Socket_ReceiveReady(object sender, NetMQSocketEventArgs e)
+        {
+            Debug.WriteLine(Identifier + "Disconnect ReceiveReady");
+            e.Socket.ReceiveReady -= Socket_ReceiveReady;
+            
+            var msg = new NetMQMessage();
+            if (e.Socket.TryReceiveMultipartMessage(TimeSpan.FromSeconds(5), ref msg))
+            {
+                Debug.WriteLine("answer received");
 
+                if (msg.FrameCount == 2)
+                {
+                    string topic = msg.First().ConvertToString();
+                    if (topic.Equals("Settings") || topic.Equals("Result"))
+                    {
+                        Debug.WriteLine("Callback startetd");
+                        callBackCommand.CallBackAction?.Invoke(msg.Last().ToByteArray());
+                    }
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"No answer received. In: {e.Socket.HasIn} Out {e.Socket.HasOut}");
+            }
 
-
-
-
+            Debug.WriteLine(Identifier + "Connect SendReady Event after receiving");
+            e.Socket.SendReady += Socket_SendReady;
+        }
     }
 
 
